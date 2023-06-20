@@ -9,6 +9,7 @@ import (
 )
 
 type MethodParamType int
+type MethodMatchType string
 
 const (
 	// MethodParamTypeUri denotes the type of parameter which is part of the URI.
@@ -16,6 +17,15 @@ const (
 
 	// MethodParamTypeQueryString denotes the type of parameter which is part of the query string.
 	MethodParamTypeQueryString // 1
+
+	// MethodMatchTypeFull denotes the type of match which is full.
+	MethodMatchTypeFull MethodMatchType = "full"
+
+	// MethodMatchTypePartial denotes the type of match which is partial.
+	MethodMatchTypeAny MethodMatchType = "any"
+
+	// MethodMatchTypePartial denotes the type of match which is partial.
+	MethodMatchTypePartial MethodMatchType = "partial"
 )
 
 // String returns a string representation of the MethodParamType.
@@ -232,152 +242,6 @@ var (
 			{
 				Key:   "chainIds",
 				Value: []int{},
-			},
-		},
-	}
-
-	// MethodGetFileTreeFullOrPartialMatch represents the API endpoint for getting the file tree with full or partial match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns repository URLs for every file in the source tree for the desired chain and address. Searches for full and partial matches.
-	// More information: https://docs.sourcify.dev/docs/api/server/get-file-tree-all/
-	MethodGetFileTreeFullOrPartialMatch = Method{
-		Name:           "Get File Tree Full or Partial Match",
-		URI:            "/files/tree/any/:chain/:address",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-file-tree-all/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodGetFileTreeFullMatch represents the API endpoint for getting the file tree with full match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns repository URLs for every file in the source tree for the desired chain and address. Searches only for full matches.
-	// More information: https://docs.sourcify.dev/docs/api/server/get-file-tree-full/
-	MethodGetFileTreeFullMatch = Method{
-		Name:           "Get File Tree Full Match",
-		URI:            "/files/tree/:chain/:address",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-file-tree-full/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodSourceFilesFullOrPartialMatch represents the API endpoint for getting the source files with full or partial match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches for full and partial matches.
-	// More information: https://docs.sourcify.dev/docs/api/server/get-source-files-all/
-	MethodSourceFilesFullOrPartialMatch = Method{
-		Name:           "Get source files for the address full or partial match",
-		URI:            "/files/any/:chain/:address",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-source-files-all/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodSourceFilesFullMatch represents the API endpoint for getting the source files with full match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
-	// More information: https://docs.sourcify.dev/docs/api/server/get-source-files-full/
-	MethodSourceFilesFullMatch = Method{
-		Name:           "Get source files for the address full match",
-		URI:            "/files/:chain/:address",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-source-files-full/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodGetFileFromRepositoryFullMatch represents the API endpoint for retrieving staticly served files over the server for full match contract in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
-	// More information: https://docs.sourcify.dev/docs/api/repository/get-file-static/
-	MethodGetFileFromRepositoryFullMatch = Method{
-		Name:           "Retrieve staticly served files over the server for full match contract",
-		URI:            "/repository/contracts/full_match/:chain/:address/:filePath",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/repository/get-file-static/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address", ":filePath"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-			{
-				Key:   ":filePath",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodGetFileFromRepositoryPartialMatch represents the API endpoint for retrieving staticly served files over the server for partial match contract in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for partial matches.
-	// More information: https://docs.sourcify.dev/docs/api/repository/get-file-static/
-	MethodGetFileFromRepositoryPartialMatch = Method{
-		Name:           "Retrieve staticly served files over the server for partial match contract",
-		URI:            "/repository/contracts/partial_match/:chain/:address/:filePath",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/repository/get-file-static/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain", ":address", ":filePath"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
-				Value: "",
-			},
-			{
-				Key:   ":address",
-				Value: "",
-			},
-			{
-				Key:   ":filePath",
-				Value: "",
 			},
 		},
 	}
