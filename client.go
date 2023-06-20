@@ -126,7 +126,12 @@ func (c *Client) callQueryMethod(method Method) (io.ReadCloser, int, error) {
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
 	}
-	requestUrl.Path = method.URI
+
+	requestPath, err := url.JoinPath(requestUrl.Path, method.URI)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to parse full API URL: %w", err)
+	}
+	requestUrl.Path = requestPath
 
 	queryParams := method.GetQueryParams()
 	requestUrl.RawQuery = queryParams.Encode()

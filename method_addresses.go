@@ -8,19 +8,21 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// MethodGetContractAddressesFullOrPartialMatch represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
-// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
-// More information: https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/
-var MethodGetContractAddressesFullOrPartialMatch = Method{
-	Name:           "Get verified contract addresses for the chain full or partial match",
-	URI:            "/files/contracts/:chain",
-	MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/",
-	Method:         "GET",
-	ParamType:      MethodParamTypeUri,
-	RequiredParams: []string{":chain"},
-	Params:         []MethodParam{},
-}
+var (
+	// MethodGetContractAddressesFullOrPartialMatch represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
+	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
+	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
+	// More information: https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/
+	MethodGetContractAddressesFullOrPartialMatch = Method{
+		Name:           "Get verified contract addresses for the chain full or partial match",
+		URI:            "/files/contracts/:chain",
+		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/",
+		Method:         "GET",
+		ParamType:      MethodParamTypeUri,
+		RequiredParams: []string{":chain"},
+		Params:         []MethodParam{},
+	}
+)
 
 // VerifiedContractAddresses represents the structure for the verified contract addresses response.
 type VerifiedContractAddresses struct {

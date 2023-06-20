@@ -111,8 +111,8 @@ func TestMethod_GetQueryParams(t *testing.T) {
 	}
 
 	expected := url.Values{
-		"param1": []string{"value1", "value2"},
-		"param2": []string{"1", "2", "3"},
+		"param1": []string{"value1,value2"},
+		"param2": []string{"1,2,3"},
 	}
 
 	assert.Equal(t, expected, method.GetQueryParams())

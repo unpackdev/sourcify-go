@@ -75,17 +75,17 @@ func (e Method) GetQueryParams() url.Values {
 		if e.ParamType == MethodParamTypeQueryString {
 			switch v := param.Value.(type) {
 			case []string:
-				for _, value := range v {
-					params.Add(param.Key, value)
-				}
+				params.Add(param.Key, strings.Join(v, ","))
 			case []int:
+				paramsString := []string{}
 				for _, value := range v {
-					params.Add(param.Key, fmt.Sprintf("%d", value))
+					paramsString = append(paramsString, fmt.Sprintf("%d", value))
 				}
+				params.Add(param.Key, strings.Join(paramsString, ","))
 			case string:
 				params.Set(param.Key, v)
 			case int:
-				params.Set(param.Key, fmt.Sprintf("%d", v))
+				params.Add(param.Key, fmt.Sprintf("%d", v))
 			}
 		}
 	}
@@ -198,51 +198,3 @@ func methodParamTypeToString(pt MethodParamType) string {
 		return "Unknown"
 	}
 }
-
-var (
-	// MethodCheckByAddresses represents the API endpoint for checking by addresses in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Checks if contract with the desired chain and address is verified and in the repository.
-	// More information: https://docs.sourcify.dev/docs/api/server/check-by-addresses/
-	MethodCheckByAddresses = Method{
-		Name:           "Check By Addresses",
-		URI:            "/check-by-addresses",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/check-by-addresses/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeQueryString,
-		RequiredParams: []string{"addresses", "chainIds"},
-		Params: []MethodParam{
-			{
-				Key:   "addresses",
-				Value: []string{},
-			},
-			{
-				Key:   "chainIds",
-				Value: []int{},
-			},
-		},
-	}
-
-	// MethodCheckAllByAddresses represents the API endpoint for checking all addresses in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Checks if contract with the desired chain and address is verified and in the repository.
-	// More information: https://docs.sourcify.dev/docs/api/server/check-all-by-addresses/
-	MethodCheckAllByAddresses = Method{
-		Name:           "Check All By Addresses",
-		URI:            "/check-all-by-addresses",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/check-all-by-addresses/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeQueryString,
-		RequiredParams: []string{"addresses", "chainIds"},
-		Params: []MethodParam{
-			{
-				Key:   "addresses",
-				Value: []string{},
-			},
-			{
-				Key:   "chainIds",
-				Value: []int{},
-			},
-		},
-	}
-)
