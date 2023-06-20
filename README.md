@@ -1,6 +1,6 @@
 
 [![Build Status](https://app.travis-ci.com/txpull/sourcify-go.svg?branch=main)](https://app.travis-ci.com/txpull/sourcify-go)
-
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Sourcify Go
 
