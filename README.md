@@ -39,11 +39,28 @@ client := sourcify.NewClient(
 Sourcify provides various API endpoints as `Method` objects. You can call these endpoints using the `CallMethod` function on the client and do your own method parsers if you wish to.
 
 ```go
-response, err := client.CallMethod(sourcify.MethodHealth)if err != nil {
-    // handle error
-}
+	customMethod := sourcify.Method{
 
-// Process the response
+	}
+	customMethod.SetParams(
+		MethodParam{Key: ":chain", Value: chainId},
+	)
+
+	if err := customMethod.Verify(); err != nil {
+		return nil, err
+	}
+
+	response, statusCode, err := client.CallMethod(customMethod)
+	if err != nil {
+		return nil, err
+	}
+
+	// Close the io.ReadCloser interface.
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
+
+	// Process the response
 ```
 
 ### Supported API Endpoints
