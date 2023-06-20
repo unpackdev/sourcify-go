@@ -1,5 +1,13 @@
 package sourcify
 
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/ethereum/go-ethereum/common"
+)
+
 var (
 	// MethodGetFileTreeFullOrPartialMatch represents the API endpoint for getting the file tree with full or partial match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
@@ -47,3 +55,57 @@ var (
 		},
 	}
 )
+
+// FileTree represents the file tree response from the Sourcify service.
+type FileTree struct {
+	Status string   `json:"status"`
+	Files  []string `json:"files"`
+}
+
+// GetContractFiles retrieves the repository URLs for every file in the source tree for the given chain ID and contract address.
+// The matchType parameter determines whether to search for full matches, partial matches, or any matches.
+// It returns the FileTree object containing the status and file URLs, or an error if any.
+func GetContractFiles(client *Client, chainId int, contract common.Address, matchType MethodMatchType) (*FileTree, error) {
+	var method Method
+
+	switch matchType {
+	case MethodMatchTypeFull:
+		method = MethodGetFileTreeFullMatch
+	case MethodMatchTypePartial:
+		method = MethodGetFileTreeFullOrPartialMatch
+	case MethodMatchTypeAny:
+		method = MethodGetFileTreeFullOrPartialMatch
+	default:
+		return nil, fmt.Errorf("invalid match type: %s", matchType)
+	}
+
+	method.SetParams(
+		MethodParam{Key: ":chain", Value: chainId},
+		MethodParam{Key: ":address", Value: contract.Hex()},
+	)
+
+	if err := method.Verify(); err != nil {
+		return nil, err
+	}
+
+	response, statusCode, err := client.CallMethod(method)
+	if err != nil {
+		return nil, err
+	}
+
+	// Close the io.ReadCloser interface.
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
+
+	if statusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
+	}
+
+	var toReturn *FileTree
+	if err := json.NewDecoder(response).Decode(&toReturn); err != nil {
+		return nil, err
+	}
+
+	return toReturn, nil
+}
