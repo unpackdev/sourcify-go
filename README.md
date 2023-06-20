@@ -10,7 +10,7 @@ It allows you to access various API endpoints and perform operations such as che
 To use Sourcify in your Go project, you can simply import the package:
 
 ```go
-import "github.com/txpull/sourcify-go"` 
+import "github.com/txpull/sourcify-go"
 ```
 
 ## Usage
