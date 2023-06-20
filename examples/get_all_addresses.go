@@ -8,6 +8,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
+// Example_GetAllAddresses demonstrates how to retrieve all available contract addresses using the Sourcify client.
 func Example_GetAllAddresses() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
@@ -24,12 +25,15 @@ func Example_GetAllAddresses() {
 		),
 	)
 
-	// Call the API method
+	// Call the API method to retrieve all available contract addresses
 	addresses, err := sourcify.GetAvailableContractAddresses(client, 56)
 	if err != nil {
 		panic(err)
 	}
 
+	// Print the number of full match addresses
 	fmt.Printf("Full Match Addresses: %d\n", len(addresses.Full))
+
+	// Print the number of partial match addresses
 	fmt.Printf("Partial Match Addresses: %d\n\n", len(addresses.Partial))
 }

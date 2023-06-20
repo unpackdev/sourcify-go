@@ -9,6 +9,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
+// Example_GetSourceCode demonstrates how to retrieve source code for a contract using the Sourcify client.
 func Example_GetSourceCode() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
@@ -25,14 +26,16 @@ func Example_GetSourceCode() {
 		),
 	)
 
-	// Get full metadata for the Binance Smart Chain with the address of the R3T contract
+	// Get source code for the Binance Smart Chain with the address of the R3T contract
 	sources, err := sourcify.GetContractSourceCode(client, 56, common.HexToAddress("0x054B2223509D430269a31De4AE2f335890be5C8F"), sourcify.MethodMatchTypeAny)
 	if err != nil {
 		panic(err)
 	}
 
+	// Print the status of the source code retrieval
 	fmt.Printf("Status: %+v\n", sources.Status)
 
+	// Iterate over the source code files and print their names and paths
 	for _, source := range sources.Code {
 		fmt.Printf("Name: %+v\n", source.Name)
 		fmt.Printf("Path: %+v\n", source.Path)

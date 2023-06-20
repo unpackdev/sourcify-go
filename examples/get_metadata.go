@@ -9,6 +9,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
+// Example_GetMetadata demonstrates how to retrieve full metadata for a contract using the Sourcify client.
 func Example_GetMetadata() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
@@ -31,5 +32,6 @@ func Example_GetMetadata() {
 		panic(err)
 	}
 
+	// Print the full match metadata
 	fmt.Printf("Full Match Metadata: %+v\n", fullMetadata)
 }

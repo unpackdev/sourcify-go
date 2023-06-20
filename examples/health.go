@@ -8,6 +8,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
+// Example_GetHealth demonstrates how to check the health status of the Sourcify server using the Sourcify client.
 func Example_GetHealth() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
@@ -24,12 +25,12 @@ func Example_GetHealth() {
 		),
 	)
 
-	// Call the API method
+	// Call the API method to get the health status
 	status, err := sourcify.GetHealth(client)
 	if err != nil {
 		panic(err)
 	}
 
-	// Process the response
+	// Print the server's health status
 	fmt.Printf("Is server alive and ready to receive requests: %v\n", status)
 }

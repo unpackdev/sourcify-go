@@ -8,6 +8,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
+// Example_GetChains demonstrates how to retrieve chains using the Sourcify client.
 func Example_GetChains() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
@@ -24,13 +25,12 @@ func Example_GetChains() {
 		),
 	)
 
-	// Call the API method
+	// Call get chains to retrieve all chains from Sourcify
 	chains, err := sourcify.GetChains(client)
 	if err != nil {
 		panic(err)
 	}
 
-	// Process the response
 	for _, chain := range chains {
 		fmt.Printf("Chain: %+v\n\n", chain)
 	}
