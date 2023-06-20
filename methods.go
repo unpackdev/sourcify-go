@@ -360,18 +360,4 @@ var (
 			},
 		},
 	}
-
-	// MethodGetChains represents the API endpoint for getting the chains (networks) added to Sourcify in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns the chains (networks) added to Sourcify. Contains both supported, unsupported, monitored, and unmonitored chains.
-	// More information: https://docs.sourcify.dev/docs/api/chains/
-	MethodGetChains = Method{
-		Name:           "Retrieve staticly served files over the server for partial match contract",
-		URI:            "/chains",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/chains/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{},
-		Params:         []MethodParam{},
-	}
 )
