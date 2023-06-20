@@ -18,6 +18,29 @@ const (
 	MethodParamTypeQueryString // 1
 )
 
+// String returns a string representation of the MethodParamType.
+func (t MethodParamType) String() string {
+	switch t {
+	case MethodParamTypeUri:
+		return "MethodParamTypeUri"
+	case MethodParamTypeQueryString:
+		return "MethodParamTypeQueryString"
+	default:
+		return fmt.Sprintf("Unknown MethodParamType (%d)", t)
+	}
+}
+
+// MethodParam represents a parameter key-value pair.
+type MethodParam struct {
+	Key   string
+	Value interface{}
+}
+
+// String returns a string representation of the MethodParam.
+func (p MethodParam) String() string {
+	return fmt.Sprintf("MethodParam{Key: %q, Value: %q}", p.Key, fmt.Sprintf("%v", p.Value))
+}
+
 // Method represents an API endpoint in the Sourcify service.
 // It includes the name, the HTTP method, the URI, and any necessary parameters for requests to this endpoint.
 type Method struct {
@@ -28,12 +51,6 @@ type Method struct {
 	ParamType      MethodParamType
 	RequiredParams []string
 	Params         []MethodParam
-}
-
-// MethodParam represents a parameter key-value pair.
-type MethodParam struct {
-	Key   string
-	Value interface{}
 }
 
 // GetParams returns a slice of the parameters for the API endpoint.
@@ -146,6 +163,29 @@ func (e Method) ParseUri() (string, error) {
 
 	default:
 		return "", fmt.Errorf("invalid MethodParamType: %v", e.ParamType)
+	}
+}
+
+// String returns a string representation of the Method struct.
+func (m Method) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Method{\n    Name: %q,\n    Method: %q,\n    URI: %q,\n    MoreInfo: %q,\n    ParamType: %s,\n    RequiredParams: %v,\n    Params: [\n", m.Name, m.Method, m.URI, m.MoreInfo, methodParamTypeToString(m.ParamType), m.RequiredParams))
+	for _, param := range m.Params {
+		sb.WriteString(fmt.Sprintf("        %s,\n", param))
+	}
+	sb.WriteString("    ],\n}")
+	return sb.String()
+}
+
+// methodParamTypeToString converts MethodParamType to a string representation.
+func methodParamTypeToString(pt MethodParamType) string {
+	switch pt {
+	case MethodParamTypeUri:
+		return "MethodParamTypeUri"
+	case MethodParamTypeQueryString:
+		return "MethodParamTypeQueryString"
+	default:
+		return "Unknown"
 	}
 }
 
