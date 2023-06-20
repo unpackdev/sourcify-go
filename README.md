@@ -17,7 +17,7 @@ import "github.com/txpull/sourcify-go"
 
 ### Creating a Client
 
-To interact with the Sourcify API, you need to create a client using the `NewClient` function. You can provide optional configuration options using `ClientOption` functions. For example, you can specify a custom base URL or a custom HTTP client.
+To interact with the Sourcify API, you need to create a client using the `NewClient` function. You can provide optional configuration options using `ClientOption` functions. For example, you can specify a custom base URL or a custom HTTP client and set retry configuration in case sourcify servers are temporairly unavailable.
 
 ```go
 client := sourcify.NewClient(
@@ -42,9 +42,9 @@ response, err := client.CallMethod(sourcify.MethodHealth)if err != nil {
 // Process the response` 
 ```
 
-### Available API Endpoints
+### Supported API Endpoints
 
-Sourcify provides the following API endpoints that you can call:
+Sourcify provides the following API endpoints that you can call that are currently supported by this package:
 
 - `MethodHealth`: Check the server status. [More information](https://docs.sourcify.dev/docs/api/server/check-server-status/)
 - `MethodGetChains`: Retrieve the chains (networks) added to Sourcify. [More information](https://docs.sourcify.dev/docs/api/server/retrieve-chains/)
@@ -62,7 +62,7 @@ For more information on each endpoint, including the parameters they require and
 
 ## Examples
 
-You can find endpoint examples under the [Examples](/examples) directory.
+You can find endpoint examples under the [examples](/examples) directory.
 
 ## Contributing
 
