@@ -136,7 +136,7 @@ func (e Method) ParseUri() (string, error) {
 		for _, param := range e.Params {
 			switch v := param.Value.(type) {
 			case string, int:
-				toReturn = strings.ReplaceAll(toReturn, ":"+param.Key, fmt.Sprintf("%v", v))
+				toReturn = strings.ReplaceAll(toReturn, param.Key, fmt.Sprintf("%v", v))
 			default:
 				// Return an error when encountering unsupported parameter type
 				return "", ErrInvalidParamType(reflect.TypeOf(v).String())
@@ -283,25 +283,6 @@ var (
 			},
 			{
 				Key:   ":address",
-				Value: "",
-			},
-		},
-	}
-
-	// MethodGetContractAddressesFullOrPartialMatch represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
-	// More information: https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/
-	MethodGetContractAddressesFullOrPartialMatch = Method{
-		Name:           "Get verified contract addresses for the chain full or partial match",
-		URI:            "/files/contracts/:chain",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/",
-		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
-		RequiredParams: []string{":chain"},
-		Params: []MethodParam{
-			{
-				Key:   ":chain",
 				Value: "",
 			},
 		},

@@ -8,7 +8,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
-func GetChains() {
+func Example_GetChains() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second,

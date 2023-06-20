@@ -21,10 +21,15 @@ var MethodHealth = Method{
 // GetHealth checks the server status by calling the MethodHealth endpoint using the provided client.
 // It returns a boolean indicating if the server is healthy and an error if any occurred during the request.
 func GetHealth(client *Client) (bool, error) {
-	_, statusCode, err := client.CallMethod(MethodHealth)
+	response, statusCode, err := client.CallMethod(MethodHealth)
 	if err != nil {
 		return false, err
 	}
+
+	// Close the io.ReadCloser interface
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
 
 	if statusCode != http.StatusOK {
 		return false, nil

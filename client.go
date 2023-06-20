@@ -2,10 +2,9 @@ package sourcify
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -82,7 +81,7 @@ func NewClient(options ...ClientOption) *Client {
 
 // CallMethod calls the specified method function with the provided parameters.
 // It returns the response body as a byte slice and an error if any.
-func (c *Client) CallMethod(method Method) ([]byte, int, error) {
+func (c *Client) CallMethod(method Method) (io.ReadCloser, int, error) {
 	if method.ParamType == MethodParamTypeUri {
 		return c.callURIMethod(method)
 	} else if method.ParamType == MethodParamTypeQueryString {
@@ -93,30 +92,26 @@ func (c *Client) CallMethod(method Method) ([]byte, int, error) {
 }
 
 // callURIMethod calls the URI-based method function with the provided parameters.
-func (c *Client) callURIMethod(method Method) ([]byte, int, error) {
+func (c *Client) callURIMethod(method Method) (io.ReadCloser, int, error) {
 	// Build the URL for the API endpoint
-	apiURL, err := url.Parse(c.BaseURL)
+	requestUrl, err := url.Parse(c.BaseURL)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
 	}
 
-	requestPath, err := url.JoinPath(apiURL.Path, method.URI)
+	uri, err := method.ParseUri()
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to parse method parameters: %w", err)
+	}
+
+	requestPath, err := url.JoinPath(requestUrl.Path, uri)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse full API URL: %w", err)
 	}
-	apiURL.Path = requestPath
-
-	// Replace URI placeholders with actual values
-	for _, param := range method.Params {
-		if v, ok := param.Value.(string); ok {
-			apiURL.Path = strings.ReplaceAll(apiURL.Path, ":"+param.Key, v)
-		} else {
-			return nil, 0, fmt.Errorf("invalid parameter value for URI: %s", param.Key)
-		}
-	}
+	requestUrl.Path = requestPath
 
 	// Prepare the request
-	req, err := http.NewRequest(method.Method, apiURL.String(), nil)
+	req, err := http.NewRequest(method.Method, requestUrl.String(), nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
@@ -125,18 +120,19 @@ func (c *Client) callURIMethod(method Method) ([]byte, int, error) {
 }
 
 // callQueryMethod calls the query-based method function with the provided parameters.
-func (c *Client) callQueryMethod(method Method) ([]byte, int, error) {
+func (c *Client) callQueryMethod(method Method) (io.ReadCloser, int, error) {
 	// Build the URL for the API endpoint
-	apiURL, err := url.Parse(c.BaseURL)
+	requestUrl, err := url.Parse(c.BaseURL)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
 	}
-	apiURL.Path = method.URI
+	requestUrl.Path = method.URI
+
 	queryParams := method.GetQueryParams()
-	apiURL.RawQuery = queryParams.Encode()
+	requestUrl.RawQuery = queryParams.Encode()
 
 	// Prepare the request
-	req, err := http.NewRequest(method.Method, apiURL.String(), nil)
+	req, err := http.NewRequest(method.Method, requestUrl.String(), nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
@@ -145,7 +141,7 @@ func (c *Client) callQueryMethod(method Method) ([]byte, int, error) {
 }
 
 // doRequestWithRetry sends the HTTP request with retry according to the configured retry options.
-func (c *Client) doRequestWithRetry(req *http.Request) ([]byte, int, error) {
+func (c *Client) doRequestWithRetry(req *http.Request) (io.ReadCloser, int, error) {
 	attempt := 0
 	for {
 		attempt++
@@ -157,12 +153,6 @@ func (c *Client) doRequestWithRetry(req *http.Request) ([]byte, int, error) {
 			}
 			return nil, 0, fmt.Errorf("failed to send HTTP request: %w", err)
 		}
-		defer resp.Body.Close()
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, 0, fmt.Errorf("failed to read response body: %w", err)
-		}
 
 		if resp.StatusCode != http.StatusOK {
 			if attempt <= c.RetryOptions.MaxRetries {
@@ -172,6 +162,6 @@ func (c *Client) doRequestWithRetry(req *http.Request) ([]byte, int, error) {
 			return nil, resp.StatusCode, fmt.Errorf("unexpected response status: %s", resp.Status)
 		}
 
-		return body, resp.StatusCode, nil
+		return resp.Body, resp.StatusCode, nil
 	}
 }

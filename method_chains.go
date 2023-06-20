@@ -89,12 +89,17 @@ func GetChains(client *Client) ([]Chain, error) {
 		return nil, err
 	}
 
+	// Close the io.ReadCloser interface
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
+
 	if statusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d - err: %s", statusCode, string(response))
+		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
 	var chains []Chain
-	if err := json.Unmarshal(response, &chains); err != nil {
+	if err := json.NewDecoder(response).Decode(&chains); err != nil {
 		return nil, err
 	}
 

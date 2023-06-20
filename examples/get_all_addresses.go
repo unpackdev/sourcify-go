@@ -8,7 +8,7 @@ import (
 	"github.com/txpull/sourcify-go"
 )
 
-func Example_GetHealth() {
+func Example_GetAllAddresses() {
 	// Create a custom HTTP client with timeout
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second,
@@ -25,11 +25,11 @@ func Example_GetHealth() {
 	)
 
 	// Call the API method
-	status, err := sourcify.GetHealth(client)
+	addresses, err := sourcify.GetAvailableContractAddresses(client, 56)
 	if err != nil {
 		panic(err)
 	}
 
-	// Process the response
-	fmt.Printf("Is server alive and ready to receive requests: %v\n", status)
+	fmt.Printf("Full Match Addresses: %d\n", len(addresses.Full))
+	fmt.Printf("Partial Match Addresses: %d\n\n", len(addresses.Partial))
 }
