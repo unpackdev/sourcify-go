@@ -1,4 +1,7 @@
 
+[![Build Status](https://app.travis-ci.com/txpull/sourcify-go.svg?branch=main)](https://app.travis-ci.com/txpull/sourcify-go)
+
+
 # Sourcify Go
 
 Sourcify Go is a Golang package that provides tools for interacting with the [Sourcify API](https://docs.sourcify.dev/docs/api). 
