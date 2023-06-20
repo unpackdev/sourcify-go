@@ -3,51 +3,76 @@ package sourcify
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strings"
 )
 
-type EndpointParamType int
+type MethodParamType int
 
 const (
-	// EndpointParamTypeUri denotes the type of parameter which is part of the URI.
-	EndpointParamTypeUri EndpointParamType = iota // 0
+	// MethodParamTypeUri denotes the type of parameter which is part of the URI.
+	MethodParamTypeUri MethodParamType = iota // 0
 
-	// EndpointParamTypeQueryString denotes the type of parameter which is part of the query string.
-	EndpointParamTypeQueryString // 1
+	// MethodParamTypeQueryString denotes the type of parameter which is part of the query string.
+	MethodParamTypeQueryString // 1
 )
 
-// Endpoint represents an API endpoint in the Sourcify service.
+// Method represents an API endpoint in the Sourcify service.
 // It includes the name, the HTTP method, the URI, and any necessary parameters for requests to this endpoint.
-type Endpoint struct {
+type Method struct {
 	Name           string
 	Method         string
 	URI            string
 	MoreInfo       string
-	ParamType      EndpointParamType
+	ParamType      MethodParamType
 	RequiredParams []string
-	Params         []EndpointParam
+	Params         []MethodParam
 }
 
-// EndpointParam represents a parameter key-value pair.
-type EndpointParam struct {
+// MethodParam represents a parameter key-value pair.
+type MethodParam struct {
 	Key   string
 	Value interface{}
 }
 
 // GetParams returns a slice of the parameters for the API endpoint.
-func (e Endpoint) GetParams() []EndpointParam {
+func (e Method) GetParams() []MethodParam {
 	return e.Params
 }
 
-// SetParams allows setting parameters for the API endpoint using a variadic list of EndpointParam values.
-func (e *Endpoint) SetParams(params ...EndpointParam) {
+// GetQueryParams returns the query parameters for the API endpoint as a url.Values object.
+func (e Method) GetQueryParams() url.Values {
+	params := url.Values{}
+	for _, param := range e.Params {
+		if e.ParamType == MethodParamTypeQueryString {
+			switch v := param.Value.(type) {
+			case []string:
+				for _, value := range v {
+					params.Add(param.Key, value)
+				}
+			case []int:
+				for _, value := range v {
+					params.Add(param.Key, fmt.Sprintf("%d", value))
+				}
+			case string:
+				params.Set(param.Key, v)
+			case int:
+				params.Set(param.Key, fmt.Sprintf("%d", v))
+			}
+		}
+	}
+	return params
+}
+
+// SetParams allows setting parameters for the API endpoint using a variadic list of MethodParam values.
+func (e *Method) SetParams(params ...MethodParam) {
 	e.Params = params
 }
 
 // Verify checks if all the required parameters for the API endpoint are provided.
 // It returns an error if any of the required parameters is missing.
-func (e Endpoint) Verify() error {
+func (e Method) Verify() error {
 	for _, param := range e.RequiredParams {
 		found := false
 		for _, endpointParam := range e.Params {
@@ -67,9 +92,9 @@ func (e Endpoint) Verify() error {
 // It can handle parameters of type string, int, []string, and []int. For []string and []int,
 // the individual elements are joined with commas for the query string.
 // Other types of parameters will trigger an error.
-func (e Endpoint) ParseUri() (string, error) {
+func (e Method) ParseUri() (string, error) {
 	switch e.ParamType {
-	case EndpointParamTypeQueryString:
+	case MethodParamTypeQueryString:
 		var toReturn string
 
 		// Add the parameters to the URL
@@ -106,7 +131,7 @@ func (e Endpoint) ParseUri() (string, error) {
 
 		return toReturn, nil
 
-	case EndpointParamTypeUri:
+	case MethodParamTypeUri:
 		toReturn := e.URI
 		for _, param := range e.Params {
 			switch v := param.Value.(type) {
@@ -120,23 +145,23 @@ func (e Endpoint) ParseUri() (string, error) {
 		return toReturn, nil
 
 	default:
-		return "", fmt.Errorf("invalid EndpointParamType: %v", e.ParamType)
+		return "", fmt.Errorf("invalid MethodParamType: %v", e.ParamType)
 	}
 }
 
 var (
-	// EndpointCheckByAddresses represents the API endpoint for checking by addresses in the Sourcify service.
+	// MethodCheckByAddresses represents the API endpoint for checking by addresses in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Checks if contract with the desired chain and address is verified and in the repository.
 	// More information: https://docs.sourcify.dev/docs/api/server/check-by-addresses/
-	EndpointCheckByAddresses = Endpoint{
+	MethodCheckByAddresses = Method{
 		Name:           "Check By Addresses",
 		URI:            "/check-by-addresses",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/check-by-addresses/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeQueryString,
+		ParamType:      MethodParamTypeQueryString,
 		RequiredParams: []string{"addresses", "chainIds"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   "addresses",
 				Value: []string{},
@@ -148,18 +173,18 @@ var (
 		},
 	}
 
-	// EndpointCheckAllByAddresses represents the API endpoint for checking all addresses in the Sourcify service.
+	// MethodCheckAllByAddresses represents the API endpoint for checking all addresses in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Checks if contract with the desired chain and address is verified and in the repository.
 	// More information: https://docs.sourcify.dev/docs/api/server/check-all-by-addresses/
-	EndpointCheckAllByAddresses = Endpoint{
+	MethodCheckAllByAddresses = Method{
 		Name:           "Check All By Addresses",
 		URI:            "/check-all-by-addresses",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/check-all-by-addresses/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeQueryString,
+		ParamType:      MethodParamTypeQueryString,
 		RequiredParams: []string{"addresses", "chainIds"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   "addresses",
 				Value: []string{},
@@ -171,18 +196,18 @@ var (
 		},
 	}
 
-	// EndpointGetFileTreeFullOrPartialMatch represents the API endpoint for getting the file tree with full or partial match in the Sourcify service.
+	// MethodGetFileTreeFullOrPartialMatch represents the API endpoint for getting the file tree with full or partial match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns repository URLs for every file in the source tree for the desired chain and address. Searches for full and partial matches.
 	// More information: https://docs.sourcify.dev/docs/api/server/get-file-tree-all/
-	EndpointGetFileTreeFullOrPartialMatch = Endpoint{
+	MethodGetFileTreeFullOrPartialMatch = Method{
 		Name:           "Get File Tree Full or Partial Match",
 		URI:            "/files/tree/any/:chain/:address",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-file-tree-all/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -194,18 +219,18 @@ var (
 		},
 	}
 
-	// EndpointGetFileTreeFullMatch represents the API endpoint for getting the file tree with full match in the Sourcify service.
+	// MethodGetFileTreeFullMatch represents the API endpoint for getting the file tree with full match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns repository URLs for every file in the source tree for the desired chain and address. Searches only for full matches.
 	// More information: https://docs.sourcify.dev/docs/api/server/get-file-tree-full/
-	EndpointGetFileTreeFullMatch = Endpoint{
+	MethodGetFileTreeFullMatch = Method{
 		Name:           "Get File Tree Full Match",
 		URI:            "/files/tree/:chain/:address",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-file-tree-full/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -217,18 +242,18 @@ var (
 		},
 	}
 
-	// EndpointSourceFilesFullOrPartialMatch represents the API endpoint for getting the source files with full or partial match in the Sourcify service.
+	// MethodSourceFilesFullOrPartialMatch represents the API endpoint for getting the source files with full or partial match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches for full and partial matches.
 	// More information: https://docs.sourcify.dev/docs/api/server/get-source-files-all/
-	EndpointSourceFilesFullOrPartialMatch = Endpoint{
+	MethodSourceFilesFullOrPartialMatch = Method{
 		Name:           "Get source files for the address full or partial match",
 		URI:            "/files/any/:chain/:address",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-source-files-all/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -240,18 +265,18 @@ var (
 		},
 	}
 
-	// EndpointSourceFilesFullMatch represents the API endpoint for getting the source files with full match in the Sourcify service.
+	// MethodSourceFilesFullMatch represents the API endpoint for getting the source files with full match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
 	// More information: https://docs.sourcify.dev/docs/api/server/get-source-files-full/
-	EndpointSourceFilesFullMatch = Endpoint{
+	MethodSourceFilesFullMatch = Method{
 		Name:           "Get source files for the address full match",
 		URI:            "/files/:chain/:address",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-source-files-full/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -263,18 +288,18 @@ var (
 		},
 	}
 
-	// EndpointGetContractAddressesFullOrPartialMatch represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
+	// MethodGetContractAddressesFullOrPartialMatch represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
 	// More information: https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/
-	EndpointGetContractAddressesFullOrPartialMatch = Endpoint{
+	MethodGetContractAddressesFullOrPartialMatch = Method{
 		Name:           "Get verified contract addresses for the chain full or partial match",
 		URI:            "/files/contracts/:chain",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -282,18 +307,18 @@ var (
 		},
 	}
 
-	// EndpointGetFileFromRepositoryFullMatch represents the API endpoint for retrieving staticly served files over the server for full match contract in the Sourcify service.
+	// MethodGetFileFromRepositoryFullMatch represents the API endpoint for retrieving staticly served files over the server for full match contract in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
 	// More information: https://docs.sourcify.dev/docs/api/repository/get-file-static/
-	EndpointGetFileFromRepositoryFullMatch = Endpoint{
+	MethodGetFileFromRepositoryFullMatch = Method{
 		Name:           "Retrieve staticly served files over the server for full match contract",
 		URI:            "/repository/contracts/full_match/:chain/:address/:filePath",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/repository/get-file-static/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address", ":filePath"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -309,18 +334,18 @@ var (
 		},
 	}
 
-	// EndpointGetFileFromRepositoryPartialMatch represents the API endpoint for retrieving staticly served files over the server for partial match contract in the Sourcify service.
+	// MethodGetFileFromRepositoryPartialMatch represents the API endpoint for retrieving staticly served files over the server for partial match contract in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for partial matches.
 	// More information: https://docs.sourcify.dev/docs/api/repository/get-file-static/
-	EndpointGetFileFromRepositoryPartialMatch = Endpoint{
+	MethodGetFileFromRepositoryPartialMatch = Method{
 		Name:           "Retrieve staticly served files over the server for partial match contract",
 		URI:            "/repository/contracts/partial_match/:chain/:address/:filePath",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/repository/get-file-static/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{":chain", ":address", ":filePath"},
-		Params: []EndpointParam{
+		Params: []MethodParam{
 			{
 				Key:   ":chain",
 				Value: "",
@@ -336,31 +361,17 @@ var (
 		},
 	}
 
-	// EndpointGetChains represents the API endpoint for getting the chains (networks) added to Sourcify in the Sourcify service.
+	// MethodGetChains represents the API endpoint for getting the chains (networks) added to Sourcify in the Sourcify service.
 	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
 	// Returns the chains (networks) added to Sourcify. Contains both supported, unsupported, monitored, and unmonitored chains.
 	// More information: https://docs.sourcify.dev/docs/api/chains/
-	EndpointGetChains = Endpoint{
+	MethodGetChains = Method{
 		Name:           "Retrieve staticly served files over the server for partial match contract",
 		URI:            "/chains",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/chains/",
 		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
+		ParamType:      MethodParamTypeUri,
 		RequiredParams: []string{},
-		Params:         []EndpointParam{},
-	}
-
-	// EndpointHealth represents the API endpoint for checking the server status in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Ping the server and see if it is alive and ready for requests.
-	// More information: https://docs.sourcify.dev/docs/api/health/
-	EndpointHealth = Endpoint{
-		Name:           "Show Server Status",
-		URI:            "/health",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/health/",
-		Method:         "GET",
-		ParamType:      EndpointParamTypeUri,
-		RequiredParams: []string{},
-		Params:         []EndpointParam{},
+		Params:         []MethodParam{},
 	}
 )

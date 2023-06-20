@@ -4,27 +4,27 @@ import (
 	"testing"
 )
 
-func TestEndpoints_Validation(t *testing.T) {
+func TestMethods_Validation(t *testing.T) {
 	tests := []struct {
 		name     string
-		endpoint Endpoint
+		endpoint Method
 		wantErr  bool
 	}{
 		{
-			name:     "Valid EndpointCheckByAddresses",
-			endpoint: EndpointCheckByAddresses,
+			name:     "Valid MethodCheckByAddresses",
+			endpoint: MethodCheckByAddresses,
 			wantErr:  false,
 		},
 		{
-			name: "Valid EndpointCheckAllByAddresses",
-			endpoint: Endpoint{
+			name: "Valid MethodCheckAllByAddresses",
+			endpoint: Method{
 				Name:           "Check All By Addresses",
 				URI:            "/check-all-by-addresses",
 				MoreInfo:       "https://docs.sourcify.dev/docs/api/server/check-all-by-addresses/",
 				Method:         "GET",
-				ParamType:      EndpointParamTypeQueryString,
+				ParamType:      MethodParamTypeQueryString,
 				RequiredParams: []string{"addresses", "chainIds"},
-				Params: []EndpointParam{
+				Params: []MethodParam{
 					{
 						Key:   "addresses",
 						Value: []string{},
@@ -39,14 +39,14 @@ func TestEndpoints_Validation(t *testing.T) {
 		},
 		{
 			name: "Missing Required Parameter",
-			endpoint: Endpoint{
-				Name:           "Invalid Endpoint",
+			endpoint: Method{
+				Name:           "Invalid Method",
 				URI:            "/invalid-endpoint",
 				MoreInfo:       "https://docs.sourcify.dev/docs/api/invalid",
 				Method:         "GET",
-				ParamType:      EndpointParamTypeQueryString,
+				ParamType:      MethodParamTypeQueryString,
 				RequiredParams: []string{"missingParam"},
-				Params: []EndpointParam{
+				Params: []MethodParam{
 					{
 						Key:   "existingParam",
 						Value: "value",
@@ -57,15 +57,15 @@ func TestEndpoints_Validation(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Invalid Endpoint URI",
-			endpoint: Endpoint{
-				Name:           "Invalid Endpoint",
+			name: "Invalid Method URI",
+			endpoint: Method{
+				Name:           "Invalid Method",
 				URI:            "/aaa", // Empty URI
 				MoreInfo:       "https://docs.sourcify.dev/docs/api/invalid",
 				Method:         "GET",
-				ParamType:      EndpointParamTypeQueryString,
+				ParamType:      MethodParamTypeQueryString,
 				RequiredParams: []string{"test"},
-				Params:         []EndpointParam{},
+				Params:         []MethodParam{},
 			},
 			wantErr: true,
 		},
@@ -76,7 +76,7 @@ func TestEndpoints_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.endpoint.Verify()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Endpoint validation failed: %v, wantErr: %v", err, tt.wantErr)
+				t.Errorf("Method validation failed: %v, wantErr: %v", err, tt.wantErr)
 			}
 		})
 	}
