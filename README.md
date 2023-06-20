@@ -42,7 +42,7 @@ response, err := client.CallMethod(sourcify.MethodHealth)if err != nil {
     // handle error
 }
 
-// Process the response` 
+// Process the response
 ```
 
 ### Supported API Endpoints
