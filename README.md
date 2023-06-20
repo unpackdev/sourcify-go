@@ -36,7 +36,10 @@ client := sourcify.NewClient(
 
 ### Calling Raw API Endpoints
 
-Sourcify provides various API endpoints as `Method` objects. You can call these endpoints using the `CallMethod` function on the client and do your own method parsers if you wish to.
+Sourcify provides various API endpoints as `Method` objects. You can call these endpoints using the `CallMethod` function on the client and do your own method parsers if you wish to. 
+
+However, if there are methods that we do not provide yet, you can do something like this to extend
+package.
 
 ```go
 customMethod := sourcify.Method{...}
