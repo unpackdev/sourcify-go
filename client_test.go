@@ -182,3 +182,31 @@ func TestDoRequestWithRetry_SuccessfulRetry(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Hello, world!", string(body))
 }
+
+func TestWithRateLimiting(t *testing.T) {
+	client := NewClient(WithRateLimiting(10, 1*time.Second))
+
+	assert.NotNil(t, client.RateLimiter)
+	assert.Equal(t, 10, client.RateLimiter.Max)
+	assert.Equal(t, 1*time.Second, client.RateLimiter.Duration)
+}
+
+func TestRateLimiting(t *testing.T) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Hello, world!")
+	}
+	server := httptest.NewServer(http.HandlerFunc(handler))
+	defer server.Close()
+
+	client := NewClient(
+		WithBaseURL(server.URL),
+		WithRateLimiting(1, 1*time.Second),
+	)
+
+	req, _ := http.NewRequest("GET", server.URL, nil)
+
+	// Perform first request - should pass
+	resp, _, err := client.doRequestWithRetry(req)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+}
