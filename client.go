@@ -63,8 +63,8 @@ func WithRetryOptions(options ...RetryOption) ClientOption {
 	}
 }
 
-// WithRateLimiting allows you to configure rate limiting for the Sourcify client.
-func WithRateLimiting(max int, duration time.Duration) ClientOption {
+// WithRateLimit allows you to configure rate limits for the Sourcify client.
+func WithRateLimit(max int, duration time.Duration) ClientOption {
 	return func(c *Client) {
 		c.RateLimiter = NewRateLimiter(max, duration)
 	}

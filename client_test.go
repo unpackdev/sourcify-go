@@ -184,7 +184,7 @@ func TestDoRequestWithRetry_SuccessfulRetry(t *testing.T) {
 }
 
 func TestWithRateLimiting(t *testing.T) {
-	client := NewClient(WithRateLimiting(10, 1*time.Second))
+	client := NewClient(WithRateLimit(10, 1*time.Second))
 
 	assert.NotNil(t, client.RateLimiter)
 	assert.Equal(t, 10, client.RateLimiter.Max)
@@ -200,7 +200,7 @@ func TestRateLimiting(t *testing.T) {
 
 	client := NewClient(
 		WithBaseURL(server.URL),
-		WithRateLimiting(1, 1*time.Second),
+		WithRateLimit(1, 1*time.Second),
 	)
 
 	req, _ := http.NewRequest("GET", server.URL, nil)
