@@ -3,7 +3,9 @@ package sourcify
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -104,12 +106,29 @@ func GetContractSourceCode(client *Client, chainId int, contract common.Address,
 	// You'll have memory leaks if you don't do this!
 	defer response.Close()
 
+	body, readBodyErr := io.ReadAll(response)
+	if readBodyErr != nil {
+		return nil, fmt.Errorf("failure to read body: %s", readBodyErr)
+	}
+
 	if statusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
-	var toReturn *SourceCodes
-	if err := json.NewDecoder(response).Decode(&toReturn); err != nil {
+	toReturn := &SourceCodes{}
+
+	if err := json.Unmarshal(body, &toReturn); err != nil {
+		// Sometimes, response will not be a JSON object, but an array.
+		// In this case, we'll get an error, but we can still return the code.
+		// This is a workaround for the Sourcify API.
+		// Ugly, but it works.
+		if strings.Contains(err.Error(), "cannot unmarshal array into Go value") {
+			toReturn.Status = "unknown"
+			if err := json.Unmarshal(body, &toReturn.Code); err != nil {
+				return nil, err
+			}
+			return toReturn, nil
+		}
 		return nil, err
 	}
 

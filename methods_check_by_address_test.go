@@ -17,20 +17,9 @@ func TestCheckContractByAddresses(t *testing.T) {
 			// Simulate a successful response with sample contract addresses
 			contractAddresses := []*CheckContractAddress{
 				{
-					Address: common.HexToAddress("0x1234567890abcdef"),
-					ChainIds: []struct {
-						ChainID string `json:"chainId"`
-						Status  string `json:"status"`
-					}{
-						{
-							ChainID: "1",
-							Status:  "verified",
-						},
-						{
-							ChainID: "2",
-							Status:  "not verified",
-						},
-					},
+					Address:  common.HexToAddress("0x1234567890abcdef"),
+					Status:   "verified",
+					ChainIDs: []string{"1", "2"},
 				},
 			}
 
@@ -59,20 +48,9 @@ func TestCheckContractByAddresses(t *testing.T) {
 
 	expectedContractAddresses := []*CheckContractAddress{
 		{
-			Address: common.HexToAddress("0x1234567890abcdef"),
-			ChainIds: []struct {
-				ChainID string `json:"chainId"`
-				Status  string `json:"status"`
-			}{
-				{
-					ChainID: "1",
-					Status:  "verified",
-				},
-				{
-					ChainID: "2",
-					Status:  "not verified",
-				},
-			},
+			Address:  common.HexToAddress("0x1234567890abcdef"),
+			Status:   "verified",
+			ChainIDs: []string{"1", "2"},
 		},
 	}
 

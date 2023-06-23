@@ -148,6 +148,7 @@ func (c *Client) callQueryMethod(method Method) (io.ReadCloser, int, error) {
 // doRequestWithRetry sends the HTTP request with retry according to the configured retry options.
 func (c *Client) doRequestWithRetry(req *http.Request) (io.ReadCloser, int, error) {
 	attempt := 0
+
 	for {
 		attempt++
 		resp, err := c.HTTPClient.Do(req)

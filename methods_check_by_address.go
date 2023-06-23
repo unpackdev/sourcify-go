@@ -58,11 +58,9 @@ var (
 
 // CheckContractAddress represents the contract address and associated chain IDs and statuses.
 type CheckContractAddress struct {
-	Address  common.Address `json:"address"` // The contract address.
-	ChainIds []struct {
-		ChainID string `json:"chainId"` // The chain ID.
-		Status  string `json:"status"`  // The status of the contract.
-	} `json:"chainIds"` // The associated chain IDs and statuses.
+	Address  common.Address `json:"address"`  // The contract address.
+	Status   string         `json:"status"`   // The status of the contract.
+	ChainIDs []string       `json:"chainIds"` // The chain ID.
 }
 
 // CheckContractByAddresses retrieves the available verified contract addresses for the given chain ID.
