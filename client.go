@@ -37,6 +37,7 @@ type Client struct {
 	BaseURL      string       // The base URL of the Sourcify API.
 	HTTPClient   *http.Client // The HTTP client to use for making requests.
 	RetryOptions RetryOptions // The retry options for the client.
+	RateLimiter  *RateLimiter // The rate limiter for the client.
 }
 
 // WithHTTPClient allows you to provide your own http.Client for the Sourcify client.
@@ -59,6 +60,13 @@ func WithRetryOptions(options ...RetryOption) ClientOption {
 		for _, opt := range options {
 			opt(&c.RetryOptions)
 		}
+	}
+}
+
+// WithRateLimit allows you to configure rate limits for the Sourcify client.
+func WithRateLimit(max int, duration time.Duration) ClientOption {
+	return func(c *Client) {
+		c.RateLimiter = NewRateLimiter(max, duration)
 	}
 }
 
@@ -150,6 +158,10 @@ func (c *Client) doRequestWithRetry(req *http.Request) (io.ReadCloser, int, erro
 	attempt := 0
 
 	for {
+		if c.RateLimiter != nil {
+			c.RateLimiter.Wait()
+		}
+
 		attempt++
 		resp, err := c.HTTPClient.Do(req)
 		if err != nil {

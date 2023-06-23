@@ -24,7 +24,7 @@ import "github.com/txpull/sourcify-go"
 
 ### Creating a Client
 
-To interact with the Sourcify API, you need to create a client using the `NewClient` function. You can provide optional configuration options using `ClientOption` functions. For example, you can specify a custom base URL or a custom HTTP client and set retry configuration in case sourcify servers are temporairly unavailable.
+To interact with the Sourcify API, you need to create a client using the `NewClient` function. You can provide optional configuration options using `ClientOption` functions. For example, you can specify a custom base URL or a custom HTTP client, set retry configuration in case sourcify servers are temporairly unavailable and set rate limits in order to control the rate at which HTTP requests are sent to the sourcify servers.
 
 ```go
 client := sourcify.NewClient(
@@ -34,6 +34,7 @@ client := sourcify.NewClient(
 		sourcify.WithMaxRetries(3),
 		sourcify.WithDelay(2*time.Second),
 	),
+	sourcify.WithRateLimit(10, 1*time.Second),
 )
 ``` 
 
