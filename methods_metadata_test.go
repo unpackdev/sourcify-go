@@ -33,15 +33,6 @@ func TestGetContractMetadata(t *testing.T) {
 						},
 					},
 				},
-				Settings: Settings{
-					CompilationTarget: CompilationTarget{BrowserStakehavensSol: "browser/Stakehavens.sol"},
-				},
-				Sources: Sources{
-					BrowserStakehavensSol: BrowserStakehavensSol{
-						Keccak256: "0xabcdef123456",
-						Urls:      []string{"https://example.com/browser/Stakehavens.sol"},
-					},
-				},
 				Version: 1,
 			}
 
@@ -85,15 +76,6 @@ func TestGetContractMetadata(t *testing.T) {
 						},
 					},
 				},
-			},
-		},
-		Settings: Settings{
-			CompilationTarget: CompilationTarget{BrowserStakehavensSol: "browser/Stakehavens.sol"},
-		},
-		Sources: Sources{
-			BrowserStakehavensSol: BrowserStakehavensSol{
-				Keccak256: "0xabcdef123456",
-				Urls:      []string{"https://example.com/browser/Stakehavens.sol"},
 			},
 		},
 		Version: 1,

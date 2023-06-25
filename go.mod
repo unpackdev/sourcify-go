@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/stretchr/testify v1.8.4
+	go.mongodb.org/mongo-driver v1.12.0
 )
 
 require (
