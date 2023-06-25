@@ -3,7 +3,9 @@ package sourcify
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -63,6 +65,16 @@ type CheckContractAddress struct {
 	ChainIDs []string       `json:"chainIds"` // The chain ID.
 }
 
+type CheckContractAddressMore struct {
+	Address common.Address                 `json:"address"`  // The contract address.
+	Info    []CheckContractAddressMoreInfo `json:"chainIds"` // The chain ID.
+}
+
+type CheckContractAddressMoreInfo struct {
+	Status  string `json:"status"`  // The status of the contract.
+	ChainID string `json:"chainId"` // The chain ID.
+}
+
 // CheckContractByAddresses retrieves the available verified contract addresses for the given chain ID.
 func CheckContractByAddresses(client *Client, addresses []string, chainIds []int, matchType MethodMatchType) ([]*CheckContractAddress, error) {
 	var method Method
@@ -101,8 +113,31 @@ func CheckContractByAddresses(client *Client, addresses []string, chainIds []int
 		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
+	body, err := io.ReadAll(response)
+	if err != nil {
+		return nil, err
+	}
+
 	var toReturn []*CheckContractAddress
-	if err := json.NewDecoder(response).Decode(&toReturn); err != nil {
+	if err := json.Unmarshal(body, &toReturn); err != nil {
+		if strings.Contains(err.Error(), "cannot unmarshal object into Go struct field CheckContractAddress.chainIds") {
+			var toReturnMore []*CheckContractAddressMore
+			if err := json.Unmarshal(body, &toReturnMore); err != nil {
+				return nil, err
+			}
+
+			for _, v := range toReturnMore {
+				for _, info := range v.Info {
+					toReturn = append(toReturn, &CheckContractAddress{
+						Address:  v.Address,
+						Status:   info.Status,
+						ChainIDs: []string{info.ChainID},
+					})
+				}
+			}
+
+			return toReturn, nil
+		}
 		return nil, err
 	}
 

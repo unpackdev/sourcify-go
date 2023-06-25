@@ -3,6 +3,7 @@ package sourcify
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -74,9 +75,7 @@ type Settings struct {
 }
 
 // CompilationTarget holds the details of the compilation target.
-type CompilationTarget struct {
-	BrowserStakehavensSol string `json:"browser/Stakehavens.sol"` // Path of the main contract in browser
-}
+type CompilationTarget map[string]string
 
 // Libraries represent the libraries used in the source code.
 type Libraries struct {
@@ -94,14 +93,13 @@ type Optimizer struct {
 }
 
 // Sources provides details about the source code.
-type Sources struct {
-	BrowserStakehavensSol BrowserStakehavensSol `json:"browser/Stakehavens.sol"` // Details about the main contract source code
-}
+type Sources map[string]SourceDetails
 
-// BrowserStakehavensSol holds the details of the main contract source code.
-type BrowserStakehavensSol struct {
+// SourceDetails holds the details of the main contract source code.
+type SourceDetails struct {
 	Keccak256 string   `json:"keccak256"` // Hash of the source code
-	Urls      []string `json:"urls"`      // URLs of the source code
+	License   string   `json:"license"`
+	Urls      []string `json:"urls"` // URLs of the source code
 }
 
 // GetContractMetadata fetches the metadata of a contract from a given client,
@@ -152,4 +150,50 @@ func GetContractMetadata(client *Client, chainId int, contract common.Address, m
 	}
 
 	return &toReturn, nil
+}
+
+func GetContractMetadataAsBytes(client *Client, chainId int, contract common.Address, matchType MethodMatchType) ([]byte, error) {
+	var method Method
+
+	switch matchType {
+	case MethodMatchTypeFull:
+		method = MethodGetFileFromRepositoryFullMatch
+	case MethodMatchTypePartial:
+		method = MethodGetFileFromRepositoryPartialMatch
+	case MethodMatchTypeAny:
+		return nil, fmt.Errorf("type: %s is not implemented", matchType)
+	default:
+		return nil, fmt.Errorf("invalid match type: %s", matchType)
+	}
+
+	method.SetParams(
+		MethodParam{Key: ":chain", Value: chainId},
+		MethodParam{Key: ":address", Value: contract.Hex()},
+		MethodParam{Key: ":filePath", Value: "metadata.json"},
+	)
+
+	if err := method.Verify(); err != nil {
+		return nil, err
+	}
+
+	response, statusCode, err := client.CallMethod(method)
+	if err != nil {
+		return nil, err
+	}
+
+	// Close the io.ReadCloser interface.
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
+
+	if statusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
+	}
+
+	body, err := io.ReadAll(response)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
