@@ -65,11 +65,13 @@ type CheckContractAddress struct {
 	ChainIDs []string       `json:"chainIds"` // The chain ID.
 }
 
+// CheckContractAddressMore represents the contract address and associated chain IDs and statuses.
 type CheckContractAddressMore struct {
 	Address common.Address                 `json:"address"`  // The contract address.
 	Info    []CheckContractAddressMoreInfo `json:"chainIds"` // The chain ID.
 }
 
+// CheckContractAddressMoreInfo represents the contract address and associated chain IDs and statuses.
 type CheckContractAddressMoreInfo struct {
 	Status  string `json:"status"`  // The status of the contract.
 	ChainID string `json:"chainId"` // The chain ID.
