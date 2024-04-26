@@ -1,9 +1,8 @@
 
-[![Build Status](https://app.travis-ci.com/txpull/sourcify-go.svg?branch=main)](https://app.travis-ci.com/txpull/sourcify-go)
-[![Coverage Status](https://coveralls.io/repos/github/txpull/sourcify-go/badge.svg?branch=main)](https://coveralls.io/github/txpull/sourcify-go?branch=main)
+[![Build Status](https://app.travis-ci.com/unpackdev/sourcify-go.svg?branch=main)](https://app.travis-ci.com/unpackdev/sourcify-go)
+[![Coverage Status](https://coveralls.io/repos/github/unpackdev/sourcify-go/badge.svg?branch=main)](https://coveralls.io/github/unpackdev/sourcify-go?branch=main)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/unpackdev/sourcify-go)](https://pkg.go.dev/github.com/unpackdev/sourcify-go)
-
 
 
 # Sourcify Go
