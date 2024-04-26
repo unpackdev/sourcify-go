@@ -2,10 +2,9 @@ package examples
 
 import (
 	"fmt"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
-
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetHealth demonstrates how to check the health status of the Sourcify server using the Sourcify client.

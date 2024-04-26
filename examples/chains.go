@@ -2,10 +2,9 @@ package examples
 
 import (
 	"fmt"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
-
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetChains demonstrates how to retrieve chains using the Sourcify client.

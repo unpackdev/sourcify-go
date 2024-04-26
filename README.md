@@ -2,7 +2,7 @@
 [![Build Status](https://app.travis-ci.com/txpull/sourcify-go.svg?branch=main)](https://app.travis-ci.com/txpull/sourcify-go)
 [![Coverage Status](https://coveralls.io/repos/github/txpull/sourcify-go/badge.svg?branch=main)](https://coveralls.io/github/txpull/sourcify-go?branch=main)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/txpull/sourcify-go)](https://pkg.go.dev/github.com/txpull/sourcify-go)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/unpackdev/sourcify-go)](https://pkg.go.dev/github.com/unpackdev/sourcify-go)
 
 
 
@@ -17,7 +17,7 @@ It allows you to access various API endpoints and perform operations such as che
 To use Sourcify in your Go project, you can simply import the package:
 
 ```go
-import "github.com/txpull/sourcify-go"
+import "github.com/unpackdev/sourcify-go"
 ```
 
 ## Usage

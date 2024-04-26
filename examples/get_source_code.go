@@ -2,11 +2,10 @@ package examples
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetSourceCode demonstrates how to retrieve source code for a contract using the Sourcify client.

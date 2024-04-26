@@ -2,10 +2,9 @@ package examples
 
 import (
 	"fmt"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
-
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_CheckAddresses demonstrates how to check contract addresses using the Sourcify client.
