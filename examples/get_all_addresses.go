@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetAllAddresses demonstrates how to retrieve all available contract addresses using the Sourcify client.

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetFiles demonstrates how to retrieve source files for a contract using the Sourcify client.

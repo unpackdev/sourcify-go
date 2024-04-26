@@ -29,6 +29,6 @@
 //	fmt.Println("Contract Metadata:", metadata)
 //
 // For more information on the Sourcify API and its endpoints, refer to the official documentation:
-//   - API Documentation: https://pkg.go.dev/github.com/txpull/sourcify-go
-//   - GitHub Repository: https://github.com/txpull/sourcify-go
+//   - API Documentation: https://pkg.go.dev/github.com/unpackdev/sourcify-go
+//   - GitHub Repository: https://github.com/unpackdev/sourcify-go
 package sourcify

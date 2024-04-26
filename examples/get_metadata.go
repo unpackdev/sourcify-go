@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/sourcify-go"
 )
 
 // Example_GetMetadata demonstrates how to retrieve full metadata for a contract using the Sourcify client.
