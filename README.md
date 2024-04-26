@@ -5,7 +5,6 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/unpackdev/sourcify-go)](https://pkg.go.dev/github.com/unpackdev/sourcify-go)
 
 
-
 # Sourcify Go
 
 Sourcify Go is a Golang package that provides tools for interacting with the [Sourcify API](https://docs.sourcify.dev/docs/api). 
