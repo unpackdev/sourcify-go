@@ -59,7 +59,7 @@ func (suite *SourcifySuite) TestGetContractSourceCode() {
 	assert := assert.New(suite.T())
 	assert.NoError(err, "Expected GetContractSourceCode to run without error")
 	assert.NotNil(sourceCode, "source code should not be nil")
-	assert.Equal(len(sourceCode.Code), 2, "Expected source code to have 2 files")
+	assert.Equal(len(sourceCode.Code), 3, "Expected source code to have 3 files")
 }
 
 // TestGetChains tests the GetChains function. It asserts that no error is returned, the chains
@@ -120,7 +120,7 @@ func (suite *SourcifySuite) TestGetContractFiles() {
 	assert := assert.New(suite.T())
 	assert.NoError(err, "Expected GetContractSourceCode to run without error")
 	assert.NotNil(tree, "tree code should not be nil")
-	assert.Equal(len(tree.Files), 2, "Expected tree to have 2 files")
+	assert.Equal(len(tree.Files), 3, "Expected tree to have 3 files")
 }
 
 // TestGetContractFiles tests the GetContractFiles function. It asserts that no error is returned,

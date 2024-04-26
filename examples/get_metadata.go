@@ -2,10 +2,10 @@ package examples
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // Example_GetMetadata demonstrates how to retrieve full metadata for a contract using the Sourcify client.

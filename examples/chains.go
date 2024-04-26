@@ -2,6 +2,7 @@ package examples
 
 import (
 	"fmt"
+	"github.com/unpackdev/sourcify-go"
 	"net/http"
 	"time"
 )
