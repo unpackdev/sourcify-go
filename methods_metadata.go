@@ -64,19 +64,6 @@ type Userdoc struct {
 	Methods map[string]DevMethod `json:"methods"` // Mapping of function signatures to their documentation
 }
 
-// Settings includes details about the compiler settings used.
-type Settings struct {
-	CompilationTarget CompilationTarget `json:"compilationTarget"` // CompilationTarget represents the compilation target details.
-	EvmVersion        string            `json:"evmVersion"`        // EVM version used
-	Libraries         Libraries         `json:"libraries"`         // Libraries used in the source code
-	Metadata          MetadataDetail    `json:"metadata"`          // MetadataDetail represents additional metadata.
-	Optimizer         Optimizer         `json:"optimizer"`         // Optimizer represents the compiler optimization details.
-	Remappings        []any             `json:"remappings"`        // Remappings used in the source code
-}
-
-// CompilationTarget holds the details of the compilation target.
-type CompilationTarget map[string]string
-
 // Libraries represent the libraries used in the source code.
 type Libraries struct {
 }
@@ -84,12 +71,6 @@ type Libraries struct {
 // MetadataDetail provides additional metadata.
 type MetadataDetail struct {
 	BytecodeHash string `json:"bytecodeHash"` // Hash of the bytecode
-}
-
-// Optimizer contains details about the compiler optimization settings.
-type Optimizer struct {
-	Enabled bool `json:"enabled"` // Whether the optimizer was enabled
-	Runs    int  `json:"runs"`    // Number of runs for the optimizer
 }
 
 // Sources provides details about the source code.
