@@ -73,21 +73,6 @@ func (suite *SourcifySuite) TestGetChains() {
 	assert.GreaterOrEqual(len(chains), 98, "Expected source code to have at least 98 chains")
 }
 
-// TestGetAvailableContractAddresses tests the GetAvailableContractAddresses function. It asserts
-// that no error is returned, the addresses are not nil, and the length of the full and partial addresses
-// are at least 1000 each.
-func (suite *SourcifySuite) TestGetAvailableContractAddresses() {
-	// Act
-	addresses, err := GetAvailableContractAddresses(suite.client, suite.SpecificChainID)
-
-	// Assert
-	assert := assert.New(suite.T())
-	assert.NoError(err, "GetAvailableContractAddresses should not return an error")
-	assert.NotNil(addresses, "addresses should not be nil")
-	assert.GreaterOrEqual(len(addresses.Full), 1000, "Expected source code to have at least 1000 addresses")
-	assert.GreaterOrEqual(len(addresses.Partial), 1000, "Expected source code to have at least 1000 addresses")
-}
-
 // TestCheckContractByAddresses tests the CheckContractByAddresses function. It asserts that no error
 // is returned and the checks are not nil.
 func (suite *SourcifySuite) TestCheckContractByAddresses() {

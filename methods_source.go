@@ -112,6 +112,11 @@ func GetContractSourceCode(client *Client, chainId int, contract common.Address,
 	}
 
 	if statusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.NewDecoder(response).Decode(&errorResp); err == nil && errorResp.Message != "" {
+			return nil, fmt.Errorf("sourcify returned error (%s): %s", errorResp.CustomCode, errorResp.Message)
+		}
+
 		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
