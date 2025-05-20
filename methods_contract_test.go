@@ -135,3 +135,41 @@ func TestUpstreamGetContractByChainIdAndAddress_FieldsOmitError(t *testing.T) {
 	// Verify the results
 	require.EqualError(t, err, "sourcify returned error (invalid_parameter): Cannot specify both fields and omit")
 }
+
+func TestUpstreamGetContractsByChainId(t *testing.T) {
+	// Skip this test in automated testing environments as it requires internet connection
+	if testing.Short() {
+		t.Skip("Skipping test in short mode as it requires internet connection")
+	}
+
+	// Create a custom HTTP client with timeout
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Create a new Sourcify client with custom options
+	client := NewClient(
+		WithHTTPClient(httpClient),
+		WithBaseURL("https://sourcify.dev/server"),
+		WithRetryOptions(
+			WithMaxRetries(3),
+			WithDelay(2*time.Second),
+		),
+	)
+
+	// Picking BSC network...
+	chainID := 56
+
+	limit := 10
+
+	// Call the function to get contract source code
+	contractsResponse, err := GetContractsByChainId(client, chainID, "asc", "", limit)
+
+	// Verify the results
+	require.NoError(t, err, "GetContractsByChainId returned an error")
+
+	require.Equal(t, len(contractsResponse.Results), limit)
+
+	// Compare the responses
+	//assert.Equal(t, localResponse, contractResponse, "GetContractByChainIdAndAddress returned unexpected contract response")
+}

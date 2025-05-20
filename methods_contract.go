@@ -31,6 +31,21 @@ var (
 				Value: ""},
 		},
 	}
+
+	MethodGetContractByChainId = Method{
+		Name:           "Get verified contract addresses for the chain full or partial match",
+		URI:            "/v2/contracts/:chain",
+		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup",
+		Method:         "GET",
+		ParamType:      MethodParamTypeUriAndQueryString,
+		RequiredParams: []string{":chain"},
+		Params: []MethodParam{
+			{
+				Key:   "fields",
+				Value: "",
+			},
+		},
+	}
 )
 
 // ContractResponse represents the response from the Sourcify API when retrieving contract information
@@ -42,7 +57,7 @@ type ContractResponse struct {
 	CreationBytecode Bytecode        `json:"creationBytecode"`
 	CreationMatch    string          `json:"creationMatch"`
 	Deployment       Deployment      `json:"deployment"`
-	Devdoc           DevDoc          `json:"devdoc"`
+	DevDoc           DevDoc          `json:"devdoc"`
 	Match            string          `json:"match"`
 	MatchID          string          `json:"matchId"`
 	Metadata         Metadata        `json:"metadata"`
@@ -54,8 +69,64 @@ type ContractResponse struct {
 	StdJSONInput     StdJSONInput    `json:"stdJsonInput"`
 	StdJSONOutput    StdJSONOutput   `json:"stdJsonOutput"`
 	StorageLayout    *StorageLayout  `json:"storageLayout"`
-	Userdoc          UserDoc         `json:"userdoc"`
+	UserDoc          UserDoc         `json:"userdoc"`
 	VerifiedAt       time.Time       `json:"verifiedAt"`
+}
+
+// ContractBaseResponse represents the response from the Sourcify API when retrieving contract information
+type ContractBaseResponse struct {
+	Address       string    `json:"address"`
+	ChainID       string    `json:"chainId"`
+	CreationMatch string    `json:"creationMatch"`
+	Match         string    `json:"match"`
+	MatchID       string    `json:"matchId"`
+	RuntimeMatch  string    `json:"runtimeMatch"`
+	VerifiedAt    time.Time `json:"verifiedAt"`
+}
+
+type ContractsResponse struct {
+	Results []ContractBaseResponse `json:"results"`
+}
+
+// GetContractsByChainId retrieves the available verified contract addresses for the given chain ID.
+func GetContractsByChainId(client *Client, chainId int, sort string, afterMatchId string, limit int) (*ContractsResponse, error) {
+	method := MethodGetContractByChainId
+
+	method.SetParams(
+		MethodParam{Key: ":chain", Value: chainId},
+		MethodParam{Key: "sort", Value: sort},
+		MethodParam{Key: "afterMatchId", Value: afterMatchId},
+		MethodParam{Key: "limit", Value: limit},
+	)
+
+	if err := method.Verify(); err != nil {
+		return nil, err
+	}
+
+	response, statusCode, err := client.CallMethod(method)
+	if err != nil {
+		return nil, err
+	}
+
+	// Close the io.ReadCloser interface.
+	// This is important as CallMethod is NOT closing the response body!
+	// You'll have memory leaks if you don't do this!
+	defer response.Close()
+
+	if statusCode != http.StatusOK {
+		if rErr := ToErrorResponse(response); rErr != nil {
+			return nil, rErr
+		}
+
+		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
+	}
+
+	var toReturn *ContractsResponse
+	if jdErr := json.NewDecoder(response).Decode(&toReturn); jdErr != nil {
+		return nil, jdErr
+	}
+
+	return toReturn, nil
 }
 
 // GetContractByChainIdAndAddress retrieves the available verified contract addresses for the given chain ID.
