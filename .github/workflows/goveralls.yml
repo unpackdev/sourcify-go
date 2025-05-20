@@ -31,3 +31,4 @@ jobs:
       - uses: shogo82148/actions-goveralls@v1.9.1
         with:
           parallel-finished: true
+

@@ -90,6 +90,7 @@ Sourcify provides the following API endpoints that you can call that are current
 #### V2 Methods
 
 - `MethodGetContractByChainIdAndAddress`: Gets contract information by chain id and address. [More information](https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-contract)
+- `MethodGetContractByChainId`: Gets contracts by chain id. [More information](https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-v2-contracts-chainId)
 
 For more information on each endpoint, including the parameters they require and the expected responses, refer to the [Sourcify API documentation](https://docs.sourcify.dev/docs/api).
 
