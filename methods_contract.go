@@ -62,10 +62,6 @@ type ContractResponse struct {
 func GetContractByChainIdAndAddress(client *Client, chainId int, address common.Address, fields []string, omit []string) (*ContractResponse, error) {
 	method := MethodGetContractByChainIdAndAddress
 
-	if len(omit) > 0 && len(fields) > 0 {
-		return nil, fmt.Errorf("fields and omit parameters cannot be used together")
-	}
-
 	// Omit and fields cannot co-exist together
 	if len(omit) == 0 && len(fields) == 0 {
 		fields = []string{"all"}

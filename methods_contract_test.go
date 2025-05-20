@@ -103,3 +103,35 @@ func TestUpstreamGetContractByChainIdAndAddress(t *testing.T) {
 	// Compare the responses
 	assert.Equal(t, localResponse, contractResponse, "GetContractByChainIdAndAddress returned unexpected contract response")
 }
+
+func TestUpstreamGetContractByChainIdAndAddress_FieldsOmitError(t *testing.T) {
+	// Skip this test in automated testing environments as it requires internet connection
+	if testing.Short() {
+		t.Skip("Skipping test in short mode as it requires internet connection")
+	}
+
+	// Create a custom HTTP client with timeout
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	// Create a new Sourcify client with custom options
+	client := NewClient(
+		WithHTTPClient(httpClient),
+		WithBaseURL("https://sourcify.dev/server"),
+		WithRetryOptions(
+			WithMaxRetries(3),
+			WithDelay(2*time.Second),
+		),
+	)
+
+	// Test it via the Ethereum USDT contract
+	chainID := 1
+	contractAddress := common.HexToAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7")
+
+	// Call the function to get contract source code
+	_, err := GetContractByChainIdAndAddress(client, chainID, contractAddress, []string{"test"}, []string{"test"})
+
+	// Verify the results
+	require.EqualError(t, err, "sourcify returned error (invalid_parameter): Cannot specify both fields and omit")
+}
