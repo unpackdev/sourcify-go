@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -90,18 +91,20 @@ func NewClient(options ...ClientOption) *Client {
 // CallMethod calls the specified method function with the provided parameters.
 // It returns the response body as a byte slice and an error if any.
 func (c *Client) CallMethod(method Method) (io.ReadCloser, int, error) {
-	if method.ParamType == MethodParamTypeUri {
+	switch method.ParamType {
+	case MethodParamTypeUri:
 		return c.callURIMethod(method)
-	} else if method.ParamType == MethodParamTypeQueryString {
+	case MethodParamTypeQueryString:
 		return c.callQueryMethod(method)
-	} else {
+	case MethodParamTypeUriAndQueryString:
+		return c.callUriAndQueryMethod(method)
+	default:
 		return nil, 0, fmt.Errorf("invalid MethodParamType: %v", method.ParamType)
 	}
 }
 
 // callURIMethod calls the URI-based method function with the provided parameters.
 func (c *Client) callURIMethod(method Method) (io.ReadCloser, int, error) {
-	// Build the URL for the API endpoint
 	requestUrl, err := url.Parse(c.BaseURL)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
@@ -118,7 +121,6 @@ func (c *Client) callURIMethod(method Method) (io.ReadCloser, int, error) {
 	}
 	requestUrl.Path = requestPath
 
-	// Prepare the request
 	req, err := http.NewRequest(method.Method, requestUrl.String(), nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to create HTTP request: %w", err)
@@ -129,7 +131,6 @@ func (c *Client) callURIMethod(method Method) (io.ReadCloser, int, error) {
 
 // callQueryMethod calls the query-based method function with the provided parameters.
 func (c *Client) callQueryMethod(method Method) (io.ReadCloser, int, error) {
-	// Build the URL for the API endpoint
 	requestUrl, err := url.Parse(c.BaseURL)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
@@ -144,8 +145,26 @@ func (c *Client) callQueryMethod(method Method) (io.ReadCloser, int, error) {
 	queryParams := method.GetQueryParams()
 	requestUrl.RawQuery = queryParams.Encode()
 
-	// Prepare the request
 	req, err := http.NewRequest(method.Method, requestUrl.String(), nil)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	return c.doRequestWithRetry(req)
+}
+
+func (c *Client) callUriAndQueryMethod(method Method) (io.ReadCloser, int, error) {
+	requestUrl, err := url.Parse(c.BaseURL)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to parse API base URL: %w", err)
+	}
+
+	uri, err := method.ParseUri()
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to parse method parameters: %w", err)
+	}
+
+	req, err := http.NewRequest(method.Method, strings.Join([]string{requestUrl.String(), uri}, ""), nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
@@ -172,12 +191,13 @@ func (c *Client) doRequestWithRetry(req *http.Request) (io.ReadCloser, int, erro
 			return nil, 0, fmt.Errorf("failed to send HTTP request: %w", err)
 		}
 
-		if resp.StatusCode != http.StatusOK {
+		// We do not want to retry on status codes less than 500 as those are not temporary errors
+		if resp.StatusCode >= 500 {
 			if attempt <= c.RetryOptions.MaxRetries {
 				time.Sleep(c.RetryOptions.Delay)
 				continue
 			}
-			return nil, resp.StatusCode, fmt.Errorf("unexpected response status: %s", resp.Status)
+			return nil, resp.StatusCode, fmt.Errorf("unexpected response (status: %s) (attempt: %d): %w", resp.Status, attempt, err)
 		}
 
 		return resp.Body, resp.StatusCode, nil

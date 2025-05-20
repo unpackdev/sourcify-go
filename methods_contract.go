@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var (
@@ -18,9 +19,17 @@ var (
 		URI:            "/v2/contract/:chain/:address",
 		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup",
 		Method:         "GET",
-		ParamType:      MethodParamTypeUri,
+		ParamType:      MethodParamTypeUriAndQueryString,
 		RequiredParams: []string{":chain", ":address"},
-		Params:         []MethodParam{},
+		Params: []MethodParam{
+			{
+				Key:   "fields",
+				Value: "",
+			},
+			{
+				Key:   "omit",
+				Value: ""},
+		},
 	}
 )
 
@@ -35,9 +44,12 @@ type ABIParameter struct {
 type ABIEntry struct {
 	Inputs          []ABIParameter `json:"inputs"`
 	Name            string         `json:"name"`
-	Outputs         []ABIParameter `json:"outputs"`
+	Outputs         []OutputDetail `json:"outputs"`
 	StateMutability string         `json:"stateMutability"`
 	Type            string         `json:"type"`
+	Constant        bool           `json:"constant"`
+	Payable         bool           `json:"payable"`
+	Anonymous       bool           `json:"anonymous,omitempty"`
 }
 
 // BytecodeHash represents the bytecode hash settings in metadata
@@ -60,48 +72,39 @@ type EVMVersion struct {
 	Remappings []interface{} `json:"remappings"`
 }
 
-// CborAuxdataOne represents the CBOR auxdata structure
-type CborAuxdataOne struct {
+// CborAuxData represents CBOR auxiliary data
+type CborAuxData struct {
 	Offset int64  `json:"offset"`
 	Value  string `json:"value"`
 }
 
-// CborAuxdata represents CBOR auxiliary data
-type CborAuxdata struct {
-	One CborAuxdataOne `json:"1"`
+// Transformation represents a bytecode transformation operation
+type Transformation struct {
+	ID     string `json:"id,omitempty"`
+	Type   string `json:"type"`
+	Offset int64  `json:"offset"`
+	Reason string `json:"reason"`
 }
+
+// TransformationValues represents the values used in bytecode transformations
+type TransformationValues struct {
+	CborAuxdata          map[string]string `json:"cborAuxdata,omitempty"`
+	ConstructorArguments string            `json:"constructorArguments,omitempty"`
+}
+
+// Libraries defines contract libraries mapping
+type Libraries map[string]string
 
 // Bytecode represents a contract's bytecode information
 type Bytecode struct {
-	CborAuxdata          CborAuxdata   `json:"cborAuxdata"`
-	LinkReferences       struct{}      `json:"linkReferences"`
-	OnchainBytecode      string        `json:"onchainBytecode"`
-	RecompiledBytecode   string        `json:"recompiledBytecode"`
-	SourceMap            string        `json:"sourceMap"`
-	TransformationValues struct{}      `json:"transformationValues"`
-	Transformations      []interface{} `json:"transformations"`
-}
-
-// RuntimeBytecode extends the Bytecode type with immutable references
-type RuntimeBytecode struct {
-	CborAuxdata          CborAuxdata   `json:"cborAuxdata"`
-	ImmutableReferences  struct{}      `json:"immutableReferences"`
-	LinkReferences       struct{}      `json:"linkReferences"`
-	OnchainBytecode      string        `json:"onchainBytecode"`
-	RecompiledBytecode   string        `json:"recompiledBytecode"`
-	SourceMap            string        `json:"sourceMap"`
-	TransformationValues struct{}      `json:"transformationValues"`
-	Transformations      []interface{} `json:"transformations"`
-}
-
-// StorageEntry represents a single storage entry
-type StorageEntry struct {
-	AstID    int64  `json:"astId"`
-	Contract string `json:"contract"`
-	Label    string `json:"label"`
-	Offset   int64  `json:"offset"`
-	Slot     string `json:"slot"`
-	Type     string `json:"type"`
+	CborAuxdata          map[string]CborAuxData `json:"cborAuxdata"`
+	LinkReferences       map[string]interface{} `json:"linkReferences"`
+	OnchainBytecode      string                 `json:"onchainBytecode"`
+	RecompiledBytecode   string                 `json:"recompiledBytecode"`
+	SourceMap            string                 `json:"sourceMap"`
+	TransformationValues TransformationValues   `json:"transformationValues"`
+	Transformations      []Transformation       `json:"transformations"`
+	ImmutableReferences  map[string]interface{} `json:"immutableReferences,omitempty"`
 }
 
 // UintType represents a uint type definition
@@ -113,10 +116,25 @@ type UintType struct {
 
 // StorageLayout represents the storage layout of a contract
 type StorageLayout struct {
-	Storage []StorageEntry `json:"storage"`
-	Types   struct {
-		TUint256 UintType `json:"t_uint256"`
-	} `json:"types"`
+	Storage []StorageEntry         `json:"storage"`
+	Types   map[string]StorageType `json:"types"`
+}
+
+// StorageType represents a type definition in the storage layout
+type StorageType struct {
+	Label         string `json:"label"`
+	Encoding      string `json:"encoding"`
+	NumberOfBytes string `json:"numberOfBytes"`
+}
+
+// StorageEntry represents a storage variable in the contract
+type StorageEntry struct {
+	Slot     string `json:"slot"`
+	Type     string `json:"type"`
+	AstId    int    `json:"astId"`
+	Label    string `json:"label"`
+	Offset   int    `json:"offset"`
+	Contract string `json:"contract"`
 }
 
 // ContractReference represents a reference to a contract file
@@ -129,16 +147,6 @@ type ContentReference struct {
 	Content string `json:"content"`
 }
 
-// FileReferences represents contract file references in sources
-type FileReferences struct {
-	Contracts_1Storage_sol ContractReference `json:"contracts/1_Storage.sol"`
-}
-
-// ContentReferences represents contract content references in sources
-type ContentReferences struct {
-	Contracts_1Storage_sol ContentReference `json:"contracts/1_Storage.sol"`
-}
-
 // SourceURLs represents source URLs information
 type SourceURLs struct {
 	Keccak256 string   `json:"keccak256"`
@@ -146,74 +154,46 @@ type SourceURLs struct {
 	Urls      []string `json:"urls"`
 }
 
-// SourceURLReferences represents source URL references
-type SourceURLReferences struct {
-	Contracts_1Storage_sol SourceURLs `json:"contracts/1_Storage.sol"`
-}
-
-// RetrieveMethodReturn represents the return value documentation for the retrieve method
-type RetrieveMethodReturn struct {
-	Zero string `json:"_0"`
-}
-
-// RetrieveMethod represents the documentation for the retrieve method
-type RetrieveMethod struct {
-	Details string               `json:"details"`
-	Returns RetrieveMethodReturn `json:"returns"`
-}
-
-// StoreMethodParams represents the parameter documentation for the store method
-type StoreMethodParams struct {
-	Num string `json:"num"`
-}
-
-// StoreMethod represents the documentation for the store method
-type StoreMethod struct {
-	Details string            `json:"details"`
-	Params  StoreMethodParams `json:"params"`
-}
-
-// DocMethods represents method documentation
-type DocMethods struct {
-	Retrieve      RetrieveMethod `json:"retrieve()"`
-	Store_uint256 StoreMethod    `json:"store(uint256)"`
-}
-
 // DevDoc represents developer documentation
 type DevDoc struct {
-	Details string     `json:"details"`
-	Kind    string     `json:"kind"`
-	Methods DocMethods `json:"methods"`
-	Title   string     `json:"title"`
-	Version int64      `json:"version"`
+	Details string         `json:"details"`
+	Kind    string         `json:"kind"`
+	Methods map[string]any `json:"methods"`
+	Title   string         `json:"title"`
+	Version int64          `json:"version"`
 }
 
 // UserDoc represents user documentation
 type UserDoc struct {
-	Kind    string   `json:"kind"`
-	Methods struct{} `json:"methods"`
-	Version int64    `json:"version"`
+	Kind    string         `json:"kind"`
+	Methods map[string]any `json:"methods"`
+	Version int64          `json:"version"`
 }
 
 // EVMBytecode represents the EVM bytecode information
 type EVMBytecode struct {
-	LinkReferences struct{} `json:"linkReferences"`
-	Object         string   `json:"object"`
-	SourceMap      string   `json:"sourceMap"`
+	LinkReferences map[string]interface{} `json:"linkReferences"`
+	Object         string                 `json:"object"`
+	SourceMap      string                 `json:"sourceMap"`
 }
 
 // EVMDeployedBytecode represents the EVM deployed bytecode information
 type EVMDeployedBytecode struct {
-	ImmutableReferences struct{} `json:"immutableReferences"`
-	LinkReferences      struct{} `json:"linkReferences"`
-	Object              string   `json:"object"`
-	SourceMap           string   `json:"sourceMap"`
+	ImmutableReferences map[string]interface{} `json:"immutableReferences"`
+	LinkReferences      map[string]interface{} `json:"linkReferences"`
+	Object              string                 `json:"object"`
+	SourceMap           string                 `json:"sourceMap"`
 }
 
 // EVM represents EVM-related information
 type EVM struct {
 	Bytecode         EVMBytecode         `json:"bytecode"`
 	DeployedBytecode EVMDeployedBytecode `json:"deployedBytecode"`
+}
+
+// MetadataDetail provides additional metadata.
+type MetadataDetail struct {
+	BytecodeHash string `json:"bytecodeHash"` // Hash of the bytecode
 }
 
 // Settings includes details about the compiler settings used.
@@ -223,7 +203,7 @@ type Settings struct {
 	Libraries         Libraries         `json:"libraries"`         // Libraries used in the source code
 	Metadata          MetadataDetail    `json:"metadata"`          // MetadataDetail represents additional metadata.
 	Optimizer         Optimizer         `json:"optimizer"`         // Optimizer represents the compiler optimization details.
-	Remappings        []any             `json:"remappings"`        // Remappings used in the source code
+	Remappings        []string          `json:"remappings"`        // Remappings used in the source code
 }
 
 // CompilationTarget holds the details of the compilation target.
@@ -237,71 +217,115 @@ type Deployment struct {
 	Deployer         string `json:"deployer"`         // The address that deployed the contract
 }
 
-// ContractResponse represents the response from the Sourcify API when retrieving contract information
-type ContractResponse struct {
-	Abi         []ABIEntry `json:"abi"`
-	Address     string     `json:"address"`
-	ChainID     string     `json:"chainId"`
-	Compilation struct {
-		Compiler           string     `json:"compiler"`
-		CompilerSettings   EVMVersion `json:"compilerSettings"`
-		CompilerVersion    string     `json:"compilerVersion"`
-		FullyQualifiedName string     `json:"fullyQualifiedName"`
-		Language           string     `json:"language"`
-		Name               string     `json:"name"`
-	} `json:"compilation"`
-	CreationBytecode Bytecode   `json:"creationBytecode"`
-	CreationMatch    string     `json:"creationMatch"`
-	Deployment       Deployment `json:"deployment"`
-	Devdoc           DevDoc     `json:"devdoc"`
-	Match            string     `json:"match"`
-	MatchID          string     `json:"matchId"`
-	Metadata         struct {
-		Compiler struct {
-			Version string `json:"version"`
-		} `json:"compiler"`
-		Language string `json:"language"`
-		Output   struct {
-			Abi     []ABIEntry `json:"abi"`
-			Devdoc  DevDoc     `json:"devdoc"`
-			Userdoc UserDoc    `json:"userdoc"`
-		} `json:"output"`
-		Settings Settings            `json:"settings"`
-		Sources  SourceURLReferences `json:"sources"`
-		Version  int64               `json:"version"`
-	} `json:"metadata"`
-	ProxyResolution struct {
-		Implementations []interface{} `json:"implementations"`
-		IsProxy         bool          `json:"isProxy"`
-		ProxyType       interface{}   `json:"proxyType"`
-	} `json:"proxyResolution"`
-	RuntimeBytecode RuntimeBytecode   `json:"runtimeBytecode"`
-	RuntimeMatch    string            `json:"runtimeMatch"`
-	SourceIds       FileReferences    `json:"sourceIds"`
-	Sources         ContentReferences `json:"sources"`
-	StdJSONInput    struct {
-		Language string            `json:"language"`
-		Settings Settings          `json:"settings"`
-		Sources  ContentReferences `json:"sources"`
-	} `json:"stdJsonInput"`
-	StdJSONOutput struct {
-		Contracts struct {
-			Contracts_1Storage_sol struct {
-				Storage struct {
-					Abi           []ABIEntry    `json:"abi"`
-					Devdoc        DevDoc        `json:"devdoc"`
-					Evm           EVM           `json:"evm"`
-					Metadata      string        `json:"metadata"`
-					StorageLayout StorageLayout `json:"storageLayout"`
-					Userdoc       UserDoc       `json:"userdoc"`
-				} `json:"Storage"`
-			} `json:"contracts/1_Storage.sol"`
-		} `json:"contracts"`
-		Sources FileReferences `json:"sources"`
-	} `json:"stdJsonOutput"`
+// Compiler contains information about the compiler used to compile the smart contract.
+type Compiler struct {
+	Version string `json:"version"` // Version of the compiler
+}
+
+// Output represents details of the compiled code in the metadata.
+type Output struct {
+	Abi     []ABIEntry `json:"abi,omitempty"`
+	Devdoc  DevDoc     `json:"devdoc,omitempty"`
+	Userdoc UserDoc    `json:"userdoc,omitempty"`
+}
+
+// MetadataSource represents a source file in the metadata.
+type MetadataSource struct {
+	Keccak256 string   `json:"keccak256,omitempty"`
+	Urls      []string `json:"urls,omitempty"`
+	License   string   `json:"license,omitempty"`
+}
+
+// Metadata represents the top-level structure for compiler metadata
+// for Ethereum smart contracts.
+type Metadata struct {
+	Compiler Compiler                  `json:"compiler"` // Compiler contains information about the compiler used.
+	Language string                    `json:"language"` // Language of the source code
+	Output   Output                    `json:"output"`   // Output represents details of the compiled code.
+	Settings Settings                  `json:"settings"` // Settings represent the compiler settings used.
+	Sources  map[string]MetadataSource `json:"sources"`  // Sources represents the details of the source code.
+	Version  int                       `json:"version"`  // Version of the metadata.
+}
+
+// Compilation contains information about the contract compilation process
+type Compilation struct {
+	Compiler           string     `json:"compiler"`
+	CompilerSettings   EVMVersion `json:"compilerSettings"`
+	CompilerVersion    string     `json:"compilerVersion"`
+	FullyQualifiedName string     `json:"fullyQualifiedName"`
+	Language           string     `json:"language"`
+	Name               string     `json:"name"`
+}
+
+// ProxyResolution contains information about proxy contract resolution
+type ProxyResolution struct {
+	Implementations []string `json:"implementations"`
+	IsProxy         bool     `json:"isProxy"`
+	ProxyType       string   `json:"proxyType,omitempty"`
+}
+
+// StdJSONInput represents the standard JSON input format for the compiler
+type StdJSONInput struct {
+	Language string                      `json:"language"`
+	Settings Settings                    `json:"settings"`
+	Sources  map[string]ContentReference `json:"sources"`
+}
+
+// SourceIdReference represents the ID reference for a source file
+type SourceIdReference struct {
+	ID int `json:"id"`
+}
+
+// SourceIds maps file paths to their corresponding source IDs
+type SourceIds map[string]SourceIdReference
+
+// StdJSONOutput represents the standard JSON output format from the compiler
+type StdJSONOutput struct {
+	Contracts map[string]map[string]ContractOutput `json:"contracts"`
+	Sources   SourceIds                            `json:"sources"`
+}
+
+// ContractOutput contains the compiled information of a contract
+type ContractOutput struct {
+	Abi           []ABIEntry    `json:"abi"`
+	Devdoc        DevDoc        `json:"devdoc"`
+	Evm           EVM           `json:"evm"`
+	Metadata      string        `json:"metadata"`
 	StorageLayout StorageLayout `json:"storageLayout"`
 	Userdoc       UserDoc       `json:"userdoc"`
-	VerifiedAt    string        `json:"verifiedAt"`
+}
+
+// SourceContent represents the content of a source file
+type SourceContent struct {
+	Content string `json:"content"`
+}
+
+// Sources maps file names to their content
+type Sources map[string]SourceContent
+
+// ContractResponse represents the response from the Sourcify API when retrieving contract information
+type ContractResponse struct {
+	Abi              []ABIEntry      `json:"abi"`
+	Address          string          `json:"address"`
+	ChainID          string          `json:"chainId"`
+	Compilation      Compilation     `json:"compilation"`
+	CreationBytecode Bytecode        `json:"creationBytecode"`
+	CreationMatch    string          `json:"creationMatch"`
+	Deployment       Deployment      `json:"deployment"`
+	Devdoc           DevDoc          `json:"devdoc"`
+	Match            string          `json:"match"`
+	MatchID          string          `json:"matchId"`
+	Metadata         Metadata        `json:"metadata"`
+	ProxyResolution  ProxyResolution `json:"proxyResolution"`
+	RuntimeBytecode  Bytecode        `json:"runtimeBytecode"`
+	RuntimeMatch     string          `json:"runtimeMatch"`
+	SourceIds        SourceIds       `json:"sourceIds"`
+	Sources          Sources         `json:"sources"`
+	StdJSONInput     StdJSONInput    `json:"stdJsonInput"`
+	StdJSONOutput    StdJSONOutput   `json:"stdJsonOutput"`
+	StorageLayout    *StorageLayout  `json:"storageLayout"`
+	Userdoc          UserDoc         `json:"userdoc"`
+	VerifiedAt       time.Time       `json:"verifiedAt"`
 }
 
 // GetContractByChainIdAndAddress retrieves the available verified contract addresses for the given chain ID.
@@ -342,13 +366,18 @@ func GetContractByChainIdAndAddress(client *Client, chainId int, address common.
 	defer response.Close()
 
 	if statusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		if err := json.NewDecoder(response).Decode(&errorResp); err == nil && errorResp.Message != "" {
+			return nil, fmt.Errorf("sourcify returned error (%s): %s", errorResp.CustomCode, errorResp.Message)
+		}
+
 		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 
 	var toReturn ContractResponse
-	if err := json.NewDecoder(response).Decode(&toReturn); err != nil {
-		return nil, err
+	if jdErr := json.NewDecoder(response).Decode(&toReturn); jdErr != nil {
+		return nil, jdErr
 	}
-
+	
 	return &toReturn, nil
 }

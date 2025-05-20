@@ -9,29 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// Metadata represents the top-level structure for compiler metadata
-// for Ethereum smart contracts.
-type Metadata struct {
-	Compiler Compiler `json:"compiler"` // Compiler contains information about the compiler used.
-	Language string   `json:"language"` // Language of the source code
-	Output   Output   `json:"output"`   // Output represents details of the compiled code.
-	Settings Settings `json:"settings"` // Settings represent the compiler settings used.
-	Sources  Sources  `json:"sources"`  // Sources represents the details of the source code.
-	Version  int      `json:"version"`  // Version of the metadata.
-}
-
-// Compiler provides information about the compiler used for the smart contract.
-type Compiler struct {
-	Version string `json:"version"` // Compiler version
-}
-
-// Output contains details about the output of the compiled code.
-type Output struct {
-	Abi     []Abi   `json:"abi"`     // Abi represents the Application Binary Interface (ABI) of the compiled code.
-	Devdoc  Devdoc  `json:"devdoc"`  // Devdoc represents the developer documentation.
-	Userdoc Userdoc `json:"userdoc"` // Userdoc represents the user documentation.
-}
-
 // Abi holds the Application Binary Interface (ABI) of the compiled code.
 type Abi struct {
 	Inputs          []any          `json:"inputs"`          // Input parameters of the functions
@@ -63,18 +40,6 @@ type DevMethod struct {
 type Userdoc struct {
 	Methods map[string]DevMethod `json:"methods"` // Mapping of function signatures to their documentation
 }
-
-// Libraries represent the libraries used in the source code.
-type Libraries struct {
-}
-
-// MetadataDetail provides additional metadata.
-type MetadataDetail struct {
-	BytecodeHash string `json:"bytecodeHash"` // Hash of the bytecode
-}
-
-// Sources provides details about the source code.
-type Sources map[string]SourceDetails
 
 // SourceDetails holds the details of the main contract source code.
 type SourceDetails struct {

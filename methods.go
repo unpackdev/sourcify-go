@@ -18,6 +18,9 @@ const (
 	// MethodParamTypeQueryString denotes the type of parameter which is part of the query string.
 	MethodParamTypeQueryString // 1
 
+	// MethodParamTypeUriAndQueryString denotes the type of parameter which is part of URI and the query string.
+	MethodParamTypeUriAndQueryString // 2
+
 	// MethodMatchTypeFull denotes the type of match which is full.
 	MethodMatchTypeFull MethodMatchType = "full"
 
@@ -35,6 +38,8 @@ func (t MethodParamType) String() string {
 		return "MethodParamTypeUri"
 	case MethodParamTypeQueryString:
 		return "MethodParamTypeQueryString"
+	case MethodParamTypeUriAndQueryString:
+		return "MethodParamTypeUriAndQueryString"
 	default:
 		return fmt.Sprintf("Unknown MethodParamType (%d)", t)
 	}
@@ -72,7 +77,7 @@ func (e Method) GetParams() []MethodParam {
 func (e Method) GetQueryParams() url.Values {
 	params := url.Values{}
 	for _, param := range e.Params {
-		if e.ParamType == MethodParamTypeQueryString {
+		if e.ParamType == MethodParamTypeQueryString || e.ParamType == MethodParamTypeUriAndQueryString {
 			switch v := param.Value.(type) {
 			case []string:
 				params.Add(param.Key, strings.Join(v, ","))
@@ -115,7 +120,7 @@ func (e Method) Verify() error {
 	return nil
 }
 
-// ParseUri constructs a URL for the API endpoint, including any necessary query parameters or URI replacements.
+// ParseUri parses the URI for the method based on the method's ParamType.
 // It can handle parameters of type string, int, []string, and []int. For []string and []int,
 // the individual elements are joined with commas for the query string.
 // Other types of parameters will trigger an error.
@@ -171,6 +176,55 @@ func (e Method) ParseUri() (string, error) {
 		}
 		return toReturn, nil
 
+	case MethodParamTypeUriAndQueryString:
+		// Start with the path part
+		toReturn := e.URI
+		params := make([]string, 0)
+
+		// First handle URI parameters (replace placeholders)
+		for _, param := range e.RequiredParams {
+			// URI parameters start with ":"
+			if strings.HasPrefix(param, ":") {
+				// This is a URI parameter
+				paramName := param[1:] // Remove the ":" prefix
+
+				// Find the parameter value from Params
+				var paramValue interface{}
+				var found bool
+				for _, p := range e.Params {
+					// Check both forms - with and without colon prefix
+					if p.Key == paramName || p.Key == param {
+						paramValue = p.Value
+						found = true
+						break
+					}
+				}
+
+				if !found || paramValue == "" {
+					return "", fmt.Errorf("missing required path parameter: %s", paramName)
+				}
+
+				// Replace the placeholder in the path
+				toReturn = strings.ReplaceAll(toReturn, param, fmt.Sprintf("%v", paramValue))
+			}
+		}
+
+		// Then handle query string parameters
+		for _, param := range e.Params {
+			// Check if this is a query param (doesn't start with ":")
+			if !strings.HasPrefix(param.Key, ":") && param.Value != "" {
+				// Add to query params if there's a value
+				params = append(params, fmt.Sprintf("%s=%v", param.Key, param.Value))
+			}
+		}
+
+		// Add query parameters if any
+		if len(params) > 0 {
+			toReturn = fmt.Sprintf("%s?%s", toReturn, strings.Join(params, "&"))
+		}
+
+		return toReturn, nil
+
 	default:
 		return "", fmt.Errorf("invalid MethodParamType: %v", e.ParamType)
 	}
@@ -179,7 +233,7 @@ func (e Method) ParseUri() (string, error) {
 // String returns a string representation of the Method struct.
 func (m Method) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Method{\n    Name: %q,\n    Method: %q,\n    URI: %q,\n    MoreInfo: %q,\n    ParamType: %s,\n    RequiredParams: %v,\n    Params: [\n", m.Name, m.Method, m.URI, m.MoreInfo, methodParamTypeToString(m.ParamType), m.RequiredParams))
+	sb.WriteString(fmt.Sprintf("Method{\n    Name: %q,\n    Method: %q,\n    Path: %q,\n    MoreInfo: %q,\n    ParamType: %s,\n    RequiredParams: %v,\n    Params: [\n", m.Name, m.Method, m.URI, m.MoreInfo, methodParamTypeToString(m.ParamType), m.RequiredParams))
 	for _, param := range m.Params {
 		sb.WriteString(fmt.Sprintf("        %s,\n", param))
 	}
@@ -194,6 +248,8 @@ func methodParamTypeToString(pt MethodParamType) string {
 		return "MethodParamTypeUri"
 	case MethodParamTypeQueryString:
 		return "MethodParamTypeQueryString"
+	case MethodParamTypeUriAndQueryString:
+		return "MethodParamTypeUriAndQueryString"
 	default:
 		return "Unknown"
 	}

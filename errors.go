@@ -1,6 +1,9 @@
 package sourcify
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
 
 var (
 	// ErrInvalidParamType represents an error when a parameter of an invalid type is encountered.
@@ -8,3 +11,9 @@ var (
 		return fmt.Errorf("encountered a parameter of invalid type: %s", t)
 	}
 )
+
+type ErrorResponse struct {
+	ErrorId    uuid.UUID `json:"errorId"`
+	CustomCode string    `json:"customCode"`
+	Message    string    `json:"message"`
+}

@@ -7,17 +7,17 @@ jobs:
       fail-fast: false
       matrix:
         go:
-          - '1.22'
+          - '1.24'
 
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: go test -v -coverprofile=profile.cov ./...
 
       - name: Send coverage
-        uses: shogo82148/actions-goveralls@v1.7.0
+        uses: shogo82148/actions-goveralls@v1.9.1
         with:
           path-to-profile: profile.cov
           flag-name: Go-${{ matrix.go }}
@@ -28,6 +28,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: shogo82148/actions-goveralls@v1.7.0
+      - uses: shogo82148/actions-goveralls@v1.9.1
         with:
           parallel-finished: true
