@@ -10,14 +10,16 @@ import (
 )
 
 var (
-	// MethodGetContractByChainIdAndAddress represents the API endpoint for getting the contract addresses with full or partial match in the Sourcify service.
-	// It includes the name, the HTTP method, the URI, and the parameters necessary for the request.
-	// Returns all verified sources from the repository for the desired contract address and chain, including metadata.json. Searches only for full matches.
-	// More information: https://docs.sourcify.dev/docs/api/#/Contract%20Lookup
+	// MethodGetContractByChainIdAndAddress represents the API endpoint for retrieving contract details by chain ID and address.
+	// It returns all verified sources from the repository for the specified contract address and chain, including metadata.json.
+	// This endpoint searches only for full matches.
+	// HTTP Method: GET
+	// URI: /v2/contract/:chain/:address
+	// Documentation: https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-contract
 	MethodGetContractByChainIdAndAddress = Method{
-		Name:           "Get verified contract addresses for the chain full or partial match",
+		Name:           "Get contract by chain id and address",
 		URI:            "/v2/contract/:chain/:address",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup",
+		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-contract",
 		Method:         "GET",
 		ParamType:      MethodParamTypeUriAndQueryString,
 		RequiredParams: []string{":chain", ":address"},
@@ -32,10 +34,15 @@ var (
 		},
 	}
 
+	// MethodGetContractByChainId represents the API endpoint for listing all verified contracts for a specific chain.
+	// It returns all verified contract addresses and basic details for the specified chain ID.
+	// HTTP Method: GET
+	// URI: /v2/contracts/:chain
+	// Documentation: https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-v2-contracts-chainId
 	MethodGetContractByChainId = Method{
-		Name:           "Get verified contract addresses for the chain full or partial match",
+		Name:           "List through all contracts for the chain",
 		URI:            "/v2/contracts/:chain",
-		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup",
+		MoreInfo:       "https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-v2-contracts-chainId",
 		Method:         "GET",
 		ParamType:      MethodParamTypeUriAndQueryString,
 		RequiredParams: []string{":chain"},
@@ -48,7 +55,8 @@ var (
 	}
 )
 
-// ContractResponse represents the response from the Sourcify API when retrieving contract information
+// ContractResponse represents the detailed response from the Sourcify API when retrieving complete contract information.
+// Contains full contract data including ABI, bytecode, sources, and metadata.
 type ContractResponse struct {
 	Abi              []ABIEntry      `json:"abi"`
 	Address          string          `json:"address"`
@@ -73,7 +81,8 @@ type ContractResponse struct {
 	VerifiedAt       time.Time       `json:"verifiedAt"`
 }
 
-// ContractBaseResponse represents the response from the Sourcify API when retrieving contract information
+// ContractBaseResponse represents the basic response from the Sourcify API when retrieving contract information.
+// Contains only essential contract verification details without the full source code or ABI.
 type ContractBaseResponse struct {
 	Address       string    `json:"address"`
 	ChainID       string    `json:"chainId"`
@@ -84,11 +93,19 @@ type ContractBaseResponse struct {
 	VerifiedAt    time.Time `json:"verifiedAt"`
 }
 
+// ContractsResponse wraps a collection of ContractBaseResponse objects returned when listing multiple contracts.
 type ContractsResponse struct {
 	Results []ContractBaseResponse `json:"results"`
 }
 
-// GetContractsByChainId retrieves the available verified contract addresses for the given chain ID.
+// GetContractsByChainId retrieves a paginated list of verified contract addresses for the given chain ID.
+// Parameters:
+//   - client: The Sourcify API client
+//   - chainId: The blockchain network ID
+//   - sort: Sorting option for results
+//   - afterMatchId: Pagination parameter; returns results after this match ID
+//   - limit: Maximum number of results to return
+// Returns a ContractsResponse containing basic information about each contract or an error.
 func GetContractsByChainId(client *Client, chainId int, sort string, afterMatchId string, limit int) (*ContractsResponse, error) {
 	method := MethodGetContractByChainId
 
@@ -129,7 +146,15 @@ func GetContractsByChainId(client *Client, chainId int, sort string, afterMatchI
 	return toReturn, nil
 }
 
-// GetContractByChainIdAndAddress retrieves the available verified contract addresses for the given chain ID.
+// GetContractByChainIdAndAddress retrieves the complete details of a verified contract by its chain ID and address.
+// Parameters:
+//   - client: The Sourcify API client
+//   - chainId: The blockchain network ID
+//   - address: The Ethereum contract address
+//   - fields: Specific fields to include in the response (use []string{"all"} for complete data)
+//   - omit: Fields to exclude from the response
+// Note: fields and omit parameters are mutually exclusive; if both are empty, fields defaults to ["all"].
+// Returns a ContractResponse containing detailed contract information or an error.
 func GetContractByChainIdAndAddress(client *Client, chainId int, address common.Address, fields []string, omit []string) (*ContractResponse, error) {
 	method := MethodGetContractByChainIdAndAddress
 
