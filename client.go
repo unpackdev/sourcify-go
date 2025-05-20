@@ -197,6 +197,10 @@ func (c *Client) doRequestWithRetry(req *http.Request) (io.ReadCloser, int, erro
 				time.Sleep(c.RetryOptions.Delay)
 				continue
 			}
+			if err == nil {
+				return nil, resp.StatusCode, fmt.Errorf("unexpected response (status: %s) (attempt: %d): no error details available", resp.Status, attempt)
+			}
+
 			return nil, resp.StatusCode, fmt.Errorf("unexpected response (status: %s) (attempt: %d): %w", resp.Status, attempt, err)
 		}
 
