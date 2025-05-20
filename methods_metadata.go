@@ -9,45 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// Abi holds the Application Binary Interface (ABI) of the compiled code.
-type Abi struct {
-	Inputs          []any          `json:"inputs"`          // Input parameters of the functions
-	StateMutability string         `json:"stateMutability"` // State of mutability of the functions
-	Type            string         `json:"type"`            // Type of the ABI entry
-	Anonymous       bool           `json:"anonymous"`       // Whether the function is anonymous
-	Name            string         `json:"name"`            // Name of the function
-	Outputs         []OutputDetail `json:"outputs"`         // Output parameters of the functions
-}
-
-// OutputDetail holds information about the output parameters of the functions.
-type OutputDetail struct {
-	InternalType string `json:"internalType"` // Internal type of the parameter
-	Name         string `json:"name"`         // Name of the parameter
-	Type         string `json:"type"`         // Type of the parameter
-}
-
-// Devdoc provides details about the developer documentation.
-type Devdoc struct {
-	DevMethods map[string]DevMethod `json:"methods"` // Mapping of function signatures to their documentation
-}
-
-// DevMethod contains information about a method in the developer documentation.
-type DevMethod struct {
-	Details string `json:"details"` // Details about the method
-}
-
-// Userdoc provides information about the user documentation.
-type Userdoc struct {
-	Methods map[string]DevMethod `json:"methods"` // Mapping of function signatures to their documentation
-}
-
-// SourceDetails holds the details of the main contract source code.
-type SourceDetails struct {
-	Keccak256 string   `json:"keccak256"` // Hash of the source code
-	License   string   `json:"license"`   // License of the source code
-	Urls      []string `json:"urls"`      // URLs of the source code
-}
-
 // GetContractMetadata fetches the metadata of a contract from a given client,
 // chain ID, contract address, and match type. It returns a Metadata object and
 // an error, if any. This function is primarily used to fetch and parse metadata
