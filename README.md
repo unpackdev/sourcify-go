@@ -72,6 +72,8 @@ defer response.Close()
 
 Sourcify provides the following API endpoints that you can call that are currently supported by this package:
 
+#### V1 Methods
+
 - `MethodHealth`: Check the server status. [More information](https://docs.sourcify.dev/docs/api/server/check-server-status/)
 - `MethodGetChains`: Retrieve the chains (networks) added to Sourcify. [More information](https://docs.sourcify.dev/docs/api/server/retrieve-chains/)
 - `MethodCheckByAddresses`: Check if contracts with the desired chain and addresses are verified and in the repository. [More information](https://docs.sourcify.dev/docs/api/server/check-by-addresses/)
@@ -83,6 +85,12 @@ Sourcify provides the following API endpoints that you can call that are current
 - `MethodGetContractAddressesFullOrPartialMatch`: Get the verified contract addresses for the chain with full or partial match. [More information](https://docs.sourcify.dev/docs/api/server/get-contract-addresses-all/)
 - `MethodGetFileFromRepositoryFullMatch`: Retrieve statically served files over the server for full match contract. [More information](https://docs.sourcify.dev/docs/api/repository/get-file-static/)
 - `MethodGetFileFromRepositoryPartialMatch`: Retrieve statically served files over the server for partial match contract. [More information](https://docs.sourcify.dev/docs/api/repository/get-file-static/)
+
+
+#### V2 Methods
+
+- `MethodGetContractByChainIdAndAddress`: Gets contract information by chain id and address. [More information](https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-contract)
+- `MethodGetContractByChainId`: Gets contracts by chain id. [More information](https://docs.sourcify.dev/docs/api/#/Contract%20Lookup/get-v2-contracts-chainId)
 
 For more information on each endpoint, including the parameters they require and the expected responses, refer to the [Sourcify API documentation](https://docs.sourcify.dev/docs/api).
 

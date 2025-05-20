@@ -95,6 +95,10 @@ func GetChains(client *Client) ([]Chain, error) {
 	defer response.Close()
 
 	if statusCode != http.StatusOK {
+		if rErr := ToErrorResponse(response); rErr != nil {
+			return nil, rErr
+		}
+
 		return nil, fmt.Errorf("unexpected status code: %d", statusCode)
 	}
 

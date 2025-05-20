@@ -19,9 +19,9 @@ func TestGetContractMetadata(t *testing.T) {
 				Compiler: Compiler{Version: "0.1.0"},
 				Language: "Solidity",
 				Output: Output{
-					Abi: []Abi{
+					Abi: []ABIEntry{
 						{
-							Inputs: []any{},
+							Inputs: []ABIParameter{},
 							Type:   "function",
 							Name:   "myFunction",
 							Outputs: []OutputDetail{
@@ -64,9 +64,9 @@ func TestGetContractMetadata(t *testing.T) {
 		Compiler: Compiler{Version: "0.1.0"},
 		Language: "Solidity",
 		Output: Output{
-			Abi: []Abi{
+			Abi: []ABIEntry{
 				{
-					Inputs: []any{},
+					Inputs: []ABIParameter{},
 					Type:   "function",
 					Name:   "myFunction",
 					Outputs: []OutputDetail{

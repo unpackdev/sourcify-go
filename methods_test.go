@@ -309,7 +309,7 @@ func TestMethod_String(t *testing.T) {
 	expected := `Method{
     Name: "Test Method",
     Method: "GET",
-    URI: "/test",
+    Path: "/test",
     MoreInfo: "https://example.com",
     ParamType: MethodParamTypeQueryString,
     RequiredParams: [param1 param2],

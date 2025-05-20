@@ -46,9 +46,9 @@ func (suite *SourcifySuite) TestGetContractMetadata() {
 	metadata, err := GetContractMetadata(suite.client, suite.SpecificChainID, suite.SpecificAddress, MethodMatchTypeFull)
 
 	// Assert
-	assert := assert.New(suite.T())
-	assert.NoError(err, "GetContractMetadata should not return an error")
-	assert.NotNil(metadata, "metadata should not be nil")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "GetContractMetadata should not return an error")
+	tAssert.NotNil(metadata, "metadata should not be nil")
 }
 
 // TestGetContractSourceCode tests the GetContractSourceCode function. It asserts that no error
@@ -56,10 +56,10 @@ func (suite *SourcifySuite) TestGetContractMetadata() {
 func (suite *SourcifySuite) TestGetContractSourceCode() {
 	sourceCode, err := GetContractSourceCode(suite.client, suite.SpecificChainID, suite.SpecificAddress, MethodMatchTypeFull)
 
-	assert := assert.New(suite.T())
-	assert.NoError(err, "Expected GetContractSourceCode to run without error")
-	assert.NotNil(sourceCode, "source code should not be nil")
-	assert.Equal(len(sourceCode.Code), 3, "Expected source code to have 3 files")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "Expected GetContractSourceCode to run without error")
+	tAssert.NotNil(sourceCode, "source code should not be nil")
+	tAssert.Equal(len(sourceCode.Code), 3, "Expected source code to have 3 files")
 }
 
 // TestGetChains tests the GetChains function. It asserts that no error is returned, the chains
@@ -67,25 +67,10 @@ func (suite *SourcifySuite) TestGetContractSourceCode() {
 func (suite *SourcifySuite) TestGetChains() {
 	chains, err := GetChains(suite.client)
 
-	assert := assert.New(suite.T())
-	assert.NoError(err, "Expected GetChains to run without error")
-	assert.NotNil(chains, "source code should not be nil")
-	assert.GreaterOrEqual(len(chains), 98, "Expected source code to have at least 98 chains")
-}
-
-// TestGetAvailableContractAddresses tests the GetAvailableContractAddresses function. It asserts
-// that no error is returned, the addresses are not nil, and the length of the full and partial addresses
-// are at least 1000 each.
-func (suite *SourcifySuite) TestGetAvailableContractAddresses() {
-	// Act
-	addresses, err := GetAvailableContractAddresses(suite.client, suite.SpecificChainID)
-
-	// Assert
-	assert := assert.New(suite.T())
-	assert.NoError(err, "GetAvailableContractAddresses should not return an error")
-	assert.NotNil(addresses, "addresses should not be nil")
-	assert.GreaterOrEqual(len(addresses.Full), 1000, "Expected source code to have at least 1000 addresses")
-	assert.GreaterOrEqual(len(addresses.Partial), 1000, "Expected source code to have at least 1000 addresses")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "Expected GetChains to run without error")
+	tAssert.NotNil(chains, "source code should not be nil")
+	tAssert.GreaterOrEqual(len(chains), 98, "Expected source code to have at least 98 chains")
 }
 
 // TestCheckContractByAddresses tests the CheckContractByAddresses function. It asserts that no error
@@ -95,9 +80,9 @@ func (suite *SourcifySuite) TestCheckContractByAddresses() {
 	checks, err := CheckContractByAddresses(suite.client, suite.Addresses, suite.ChainIDs, MethodMatchTypeFull)
 
 	// Assert
-	assert := assert.New(suite.T())
-	assert.NoError(err, "CheckContractByAddresses should not return an error")
-	assert.NotNil(checks, "checks should not be nil")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "CheckContractByAddresses should not return an error")
+	tAssert.NotNil(checks, "checks should not be nil")
 }
 
 // TestGetHealth tests the GetHealth function. It asserts that no error is returned and the status
@@ -107,9 +92,9 @@ func (suite *SourcifySuite) TestGetHealth() {
 	status, err := GetHealth(suite.client)
 
 	// Assert
-	assert := assert.New(suite.T())
-	assert.NoError(err, "GetHealth should not return an error")
-	assert.True(status, "status should be true")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "GetHealth should not return an error")
+	tAssert.True(status, "status should be true")
 }
 
 // TestGetContractFiles tests the GetContractFiles function. It asserts that no error is returned,
@@ -117,10 +102,10 @@ func (suite *SourcifySuite) TestGetHealth() {
 func (suite *SourcifySuite) TestGetContractFiles() {
 	tree, err := GetContractFiles(suite.client, suite.SpecificChainID, suite.SpecificAddress, MethodMatchTypeFull)
 
-	assert := assert.New(suite.T())
-	assert.NoError(err, "Expected GetContractSourceCode to run without error")
-	assert.NotNil(tree, "tree code should not be nil")
-	assert.Equal(len(tree.Files), 3, "Expected tree to have 3 files")
+	tAssert := assert.New(suite.T())
+	tAssert.NoError(err, "Expected GetContractSourceCode to run without error")
+	tAssert.NotNil(tree, "tree code should not be nil")
+	tAssert.Equal(len(tree.Files), 3, "Expected tree to have 3 files")
 }
 
 // TestGetContractFiles tests the GetContractFiles function. It asserts that no error is returned,

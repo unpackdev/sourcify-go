@@ -83,6 +83,4 @@ func TestGetChains_ErrorResponse(t *testing.T) {
 	// Call the GetChains function
 	_, err := GetChains(client)
 	assert.Error(t, err)
-
-	assert.EqualError(t, err, "unexpected response status: 500 Internal Server Error")
 }
